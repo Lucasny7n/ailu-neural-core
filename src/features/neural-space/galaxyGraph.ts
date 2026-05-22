@@ -36,7 +36,22 @@ export interface GalaxyObject {
   label: string;
   subtitle?: string;
   description?: string;
+  
+  // posição ampla para exploração
   position: [number, number, number];
+  
+  // posição cinematográfica para cockpit
+  cockpitPosition?: [number, number, number];
+  
+  // escala no cockpit
+  cockpitScale?: number;
+  
+  // escala na exploração
+  explorationScale?: number;
+  
+  // importância visual
+  visualWeight?: number;
+  
   orbitRadius?: number;
   orbitSpeed?: number;
   parentId?: string;
@@ -123,6 +138,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Núcleo operacional",
     description: "Centro da galáxia neural. Coordena conversa, contexto ativo, memória e planos protegidos por aprovação.",
     position: [0, 0, 0],
+    cockpitPosition: [0, 0, 0],
+    cockpitScale: 1.8,
+    visualWeight: 10,
     status: "online",
     colorRole: "core",
     relatedIds: ["memory", "ai", "system", "actions"],
@@ -135,6 +153,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Vault local e contexto",
     description: "Notas, arquivos, decisões, conversas e relações recuperadas pelo Núcleo de Memória.",
     position: [-5.5, 2.2, -3.2],
+    cockpitPosition: [-4.2, 1.8, -2.4],
+    cockpitScale: 1.4,
+    visualWeight: 8,
     status: "active",
     colorRole: "memory",
     relatedIds: ["memory-notes", "memory-files", "memory-decisions", "ai-recovered-context"],
@@ -147,6 +168,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Modelo e roteamento",
     description: "Camada de modelo local, prompt ativo, contexto recuperado e histórico de conversa.",
     position: [4.8, -2.1, -1.8],
+    cockpitPosition: [3.6, -1.6, -1.4],
+    cockpitScale: 1.3,
+    visualWeight: 8,
     status: "online",
     colorRole: "core",
     relatedIds: ["ollama", "ai-current-model", "memory"],
@@ -159,6 +183,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Arch, systemd e pacotes",
     description: "Leitura segura de kernel, serviços, logs e pacotes. Ações reais continuam protegidas.",
     position: [6.2, 2.5, 2.8],
+    cockpitPosition: [4.8, 2.0, 2.2],
+    cockpitScale: 1.3,
+    visualWeight: 7,
     status: "idle",
     colorRole: "system",
     relatedIds: ["kernel", "systemd", "packages", "logs"],
@@ -171,6 +198,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Hyprland e sessão visual",
     description: "Região da sessão gráfica: Hyprland, monitores, workspaces, janelas e Quickshell.",
     position: [-5.8, -1.8, 2.2],
+    cockpitPosition: [-4.4, -1.4, 1.8],
+    cockpitScale: 1.3,
+    visualWeight: 7,
     status: "idle",
     colorRole: "system",
     relatedIds: ["hyprland", "monitors", "workspaces", "windows"],
@@ -183,6 +213,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Dispositivos e drivers",
     description: "Mapa dos componentes físicos e drivers sem alteração automática.",
     position: [3.2, 4.4, -4.5],
+    cockpitPosition: [2.4, 3.2, -3.4],
+    cockpitScale: 1.3,
+    visualWeight: 7,
     status: "idle",
     colorRole: "hardware",
     relatedIds: ["cpu", "gpu", "ram-zram", "storage"],
@@ -195,6 +228,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Processamento",
     description: "Carga, processos e pressão de CPU.",
     position: [1.6, 5.8, -3.2],
+    cockpitPosition: [1.2, 4.2, -2.4],
+    cockpitScale: 1.2,
+    visualWeight: 6,
     status: "idle",
     colorRole: "hardware",
     relatedIds: ["hardware", "system"],
@@ -207,6 +243,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Radeon, Mesa e Vulkan",
     description: "Estado visual e gráfico, ligado ao Hyprland e ao stack Mesa/RADV.",
     position: [5.6, 4.8, -4.4],
+    cockpitPosition: [4.2, 3.6, -3.4],
+    cockpitScale: 1.3,
+    visualWeight: 7,
     status: "idle",
     colorRole: "hardware",
     relatedIds: ["hardware", "hyprland", "drivers"],
@@ -219,6 +258,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Memória e swap comprimido",
     description: "Uso de RAM, pressão de memória, swap e ZRAM.",
     position: [5.4, -4.2, -3.6],
+    cockpitPosition: [4.0, -3.2, -2.8],
+    cockpitScale: 1.2,
+    visualWeight: 6,
     status: "idle",
     colorRole: "hardware",
     relatedIds: ["zram", "memory-pressure", "hardware"],
@@ -231,6 +273,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Disco e vault",
     description: "Discos, uso local e relação com o vault de memória.",
     position: [6.8, -3.4, 2.5],
+    cockpitPosition: [5.2, -2.6, 2.0],
+    cockpitScale: 1.2,
+    visualWeight: 6,
     status: "idle",
     colorRole: "hardware",
     relatedIds: ["disk", "memory", "packages"],
@@ -243,6 +288,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Rede, Bluetooth e DNS",
     description: "Rede local, Bluetooth, DNS e rotas.",
     position: [-6.2, -4.5, 3.8],
+    cockpitPosition: [-4.8, -3.4, 2.8],
+    cockpitScale: 1.2,
+    visualWeight: 6,
     status: "idle",
     colorRole: "connectivity",
     relatedIds: ["network", "bluetooth", "dns"],
@@ -255,6 +303,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "PipeWire e dispositivos",
     description: "PipeWire, WirePlumber, sinks, sources e dispositivos de áudio.",
     position: [-1.4, -6.2, 4.5],
+    cockpitPosition: [-1.0, -4.6, 3.4],
+    cockpitScale: 1.2,
+    visualWeight: 6,
     status: "idle",
     colorRole: "audio",
     relatedIds: ["pipewire", "wireplumber", "audio-devices"],
@@ -267,6 +318,9 @@ export const galaxyObjects: GalaxyObject[] = [
     subtitle: "Planos e aprovações",
     description: "Planos, aprovações, execuções e histórico. Nada executa sem autorização explícita.",
     position: [0.0, -5.8, -2.5],
+    cockpitPosition: [0.0, -4.2, -2.0],
+    cockpitScale: 1.3,
+    visualWeight: 7,
     status: "approval",
     colorRole: "action",
     relatedIds: ["plans", "approvals", "executions", "action-history"],

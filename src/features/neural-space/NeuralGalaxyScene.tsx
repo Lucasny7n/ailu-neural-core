@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -22,7 +22,11 @@ import {
 } from "./galaxyGraph";
 import { emitNeuralEvent } from "./neuralEvents";
 
+export type GalaxyViewMode = "cockpit" | "exploration";
+
 export function NeuralGalaxyScene(): JSX.Element {
+  const [viewMode, setViewMode] = useState<GalaxyViewMode>("cockpit");
+  
   const selectedGalaxyObjectId = useNeuralStore((state) => state.selectedGalaxyObjectId);
   const selectedConnectionId = useNeuralStore((state) => state.selectedConnectionId);
   const activePlan = useNeuralStore((state) => state.activePlan);
@@ -59,15 +63,56 @@ export function NeuralGalaxyScene(): JSX.Element {
   ]);
   const renderedConnections = useMemo(
     () =>
-      config.showSecondaryConnections
+      config.showSecondaryConnections || viewMode === "exploration"
         ? allConnections
         : allConnections.filter((connection) => connection.active || connection.strength >= 0.62 || activeIds.has(connection.fromId) || activeIds.has(connection.toId)),
-    [activeIds, allConnections, config.showSecondaryConnections],
+    [activeIds, allConnections, config.showSecondaryConnections, viewMode],
   );
   const target = useMemo(() => new Vector3(...selectedObject.position), [selectedObject.position]);
   const dpr: [number, number] = config.galaxyQuality === "ultra" ? [1.25, 1.8] : config.galaxyQuality === "low" ? [0.8, 1.1] : [1, 1.5];
   const starCount = config.galaxyQuality === "ultra" ? 1500 : config.galaxyQuality === "low" ? 650 : 1050;
   const particleLimit = config.particleDensity === "high" ? config.maxParticles : config.particleDensity === "low" ? Math.floor(config.maxParticles * 0.42) : Math.floor(config.maxParticles * 0.7);
+  
+  // Configurações de câmera por modo
+  const cockpitCamera = useMemo(() => ({ position: [0, 7.5, 22] as [number, number, number], fov: 52, near: 0.1, far: 900 }), []);
+  const explorationCamera = useMemo(() => ({ position: [0, 18, 70] as [number, number, number], fov: 58, near: 0.1, far: 1200 }), []);
+  const currentCamera = viewMode === "cockpit" ? cockpitCamera : explorationCamera;
+  
+  // Obter posição do objeto baseado no modo
+  const getObjectPosition = useMemo(() => {
+    return (obj: GalaxyObject): [number, number, number] => {
+      if (viewMode === "cockpit" && obj.cockpitPosition) {
+        return obj.cockpitPosition;
+      }
+      return obj.position;
+    };
+  }, [viewMode]);
+  
+  // Obter escala do objeto baseado no modo
+  const getObjectScale = useMemo(() => {
+    return (obj: GalaxyObject): number => {
+      if (viewMode === "cockpit" && obj.cockpitScale) {
+        return obj.cockpitScale;
+      }
+      if (viewMode === "exploration" && obj.explorationScale) {
+        return obj.explorationScale;
+      }
+      return 1;
+    };
+  }, [viewMode]);
+  
+  // Criar objetos com posições ajustadas para o modo atual
+  const modeAdjustedObjects = useMemo(() => {
+    return allObjects.map(obj => ({
+      ...obj,
+      position: getObjectPosition(obj),
+      scale: getObjectScale(obj),
+    }));
+  }, [allObjects, getObjectPosition, getObjectScale]);
+  
+  const modeAdjustedObjectMap = useMemo(() => {
+    return new Map(modeAdjustedObjects.map((object) => [object.id, object]));
+  }, [modeAdjustedObjects]);
 
   if (!hasWebGl()) {
     return (
@@ -93,98 +138,118 @@ export function NeuralGalaxyScene(): JSX.Element {
   }
 
   return (
-    <Canvas
-      className="neural-canvas"
-      dpr={dpr}
-      camera={{ position: [0, 16, 48], fov: 58, near: 0.1, far: 900 }}
-      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      onPointerMissed={returnToCore}
-    >
-      <color attach="background" args={["#000206"]} />
-      <fog attach="fog" args={["#000206", 45, 600]} />
-      <ambientLight intensity={0.4} />
-      <directionalLight color="#38d5ff" position={[10, 20, 10]} intensity={1.8} />
-      <pointLight color="#0f8cff" position={[-15, -10, -15]} intensity={4.5} distance={120} />
-      <pointLight color="#c247ff" position={[-20, -12, -8]} intensity={2.8} distance={100} />
-      <Stars radius={300} depth={80} count={starCount * 2} factor={3.5} saturation={0.5} fade speed={0.4} />
+    <div className="neural-space">
+      <Canvas
+        className="neural-canvas"
+        dpr={dpr}
+        camera={currentCamera}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        onPointerMissed={returnToCore}
+      >
+        <color attach="background" args={["#000206"]} />
+        <fog attach="fog" args={["#000206", viewMode === "cockpit" ? 35 : 45, viewMode === "cockpit" ? 500 : 600]} />
+        <ambientLight intensity={0.4} />
+        <directionalLight color="#38d5ff" position={[10, 20, 10]} intensity={1.8} />
+        <pointLight color="#0f8cff" position={[-15, -10, -15]} intensity={4.5} distance={120} />
+        <pointLight color="#c247ff" position={[-20, -12, -8]} intensity={2.8} distance={100} />
+        <Stars radius={viewMode === "cockpit" ? 200 : 300} depth={80} count={starCount * 2} factor={3.5} saturation={0.5} fade speed={0.4} />
 
-      {config.showOrbits
-        ? allObjects.map((object) => {
-            const parent = object.parentId ? objectMap.get(object.parentId) : undefined;
-            return parent ? <GalaxyOrbit key={`orbit-${object.id}`} object={object} parent={parent} active={activeIds.has(object.id)} /> : null;
-          })
-        : null}
+        {config.showOrbits
+          ? modeAdjustedObjects.map((object) => {
+              const parent = object.parentId ? modeAdjustedObjectMap.get(object.parentId) : undefined;
+              return parent ? <GalaxyOrbit key={`orbit-${object.id}`} object={object} parent={parent} active={activeIds.has(object.id)} /> : null;
+            })
+          : null}
 
-      {renderedConnections.map((connection) => {
-        const from = objectMap.get(connection.fromId);
-        const to = objectMap.get(connection.toId);
-        if (!from || !to) {
-          return null;
-        }
-        return (
-          <GalaxyConnection
-            key={connection.id}
-            connection={connection}
-            from={from}
-            to={to}
-            selected={selectedConnectionId === connection.id}
-            dimmed={selectedObject.id !== "core" && !activeIds.has(connection.fromId) && !activeIds.has(connection.toId)}
-            onSelect={() => handleConnectionSelect(connection)}
-          />
-        );
-      })}
-
-      <GalaxyParticles
-        connections={renderedConnections}
-        objects={objectMap}
-        selectedConnectionId={selectedConnectionId}
-        reducedMotion={config.reducedMotion}
-        maxParticles={particleLimit}
-      />
-
-      {allObjects.map((object) => {
-        const selected = selectedObject.id === object.id;
-        const dimmed = selectedObject.id !== "core" && !activeIds.has(object.id);
-        if (object.kind === "core") {
+        {renderedConnections.map((connection) => {
+          const from = modeAdjustedObjectMap.get(connection.fromId);
+          const to = modeAdjustedObjectMap.get(connection.toId);
+          if (!from || !to) {
+            return null;
+          }
           return (
-            <GalaxyCore
+            <GalaxyConnection
+              key={connection.id}
+              connection={connection}
+              from={from}
+              to={to}
+              selected={selectedConnectionId === connection.id}
+              dimmed={selectedObject.id !== "core" && !activeIds.has(connection.fromId) && !activeIds.has(connection.toId)}
+              onSelect={() => handleConnectionSelect(connection)}
+            />
+          );
+        })}
+
+        <GalaxyParticles
+          connections={renderedConnections}
+          objects={modeAdjustedObjectMap}
+          selectedConnectionId={selectedConnectionId}
+          reducedMotion={config.reducedMotion}
+          maxParticles={particleLimit}
+        />
+
+        {modeAdjustedObjects.map((object) => {
+          const selected = selectedObject.id === object.id;
+          const dimmed = selectedObject.id !== "core" && !activeIds.has(object.id);
+          if (object.kind === "core") {
+            return (
+              <GalaxyCore
+                key={object.id}
+                object={object}
+                selected={selected}
+                approvalActive={Boolean(activePlan)}
+                onSelect={() => handleObjectSelect(object)}
+              />
+            );
+          }
+          if (object.kind === "star") {
+            return <GalaxyStar key={object.id} object={object} selected={selected} dimmed={dimmed} onSelect={() => handleObjectSelect(object)} />;
+          }
+          return (
+            <GalaxyPlanet
               key={object.id}
               object={object}
+              parent={object.parentId ? modeAdjustedObjectMap.get(object.parentId) : undefined}
               selected={selected}
-              approvalActive={Boolean(activePlan)}
+              dimmed={dimmed}
               onSelect={() => handleObjectSelect(object)}
             />
           );
-        }
-        if (object.kind === "star") {
-          return <GalaxyStar key={object.id} object={object} selected={selected} dimmed={dimmed} onSelect={() => handleObjectSelect(object)} />;
-        }
-        return (
-          <GalaxyPlanet
-            key={object.id}
-            object={object}
-            parent={object.parentId ? objectMap.get(object.parentId) : undefined}
-            selected={selected}
-            dimmed={dimmed}
-            onSelect={() => handleObjectSelect(object)}
-          />
-        );
-      })}
+        })}
 
-      <GalaxyFocusCamera focusedObject={selectedObject} />
-      <OrbitControls
-        makeDefault
-        target={target}
-        enableDamping
-        dampingFactor={0.06}
-        minDistance={2.5}
-        maxDistance={95}
-        rotateSpeed={0.55}
-        zoomSpeed={0.85}
-        enablePan
-        panSpeed={0.6}
-      />
-    </Canvas>
+        <GalaxyFocusCamera focusedObject={selectedObject} />
+        <OrbitControls
+          makeDefault
+          target={target}
+          enableDamping
+          dampingFactor={0.06}
+          minDistance={viewMode === "cockpit" ? 2.5 : 4}
+          maxDistance={viewMode === "cockpit" ? 55 : 140}
+          rotateSpeed={0.55}
+          zoomSpeed={0.85}
+          enablePan
+          panSpeed={0.6}
+        />
+      </Canvas>
+      
+      {/* HUD de controle de modo */}
+      <div className="hud-layer">
+        <div className="view-mode-toggle hud-panel hud-corners" style={{ top: '72px', left: '92px', padding: '10px 14px' }}>
+          <button 
+            className={`hud-button ${viewMode === "cockpit" ? "active" : ""}`}
+            onClick={() => { setViewMode("cockpit"); addTelemetry({ level: "info", message: "Modo Cockpit ativado" }); }}
+          >
+            Cockpit
+          </button>
+          <button 
+            className={`hud-button ${viewMode === "exploration" ? "active" : ""}`}
+            onClick={() => { setViewMode("exploration"); addTelemetry({ level: "info", message: "Modo Exploração ativado" }); }}
+          >
+            Galáxia inteira
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
