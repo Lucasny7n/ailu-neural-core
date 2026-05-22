@@ -20,6 +20,7 @@ import type {
 import type { VoiceStatus } from "../features/voice/voiceClient";
 
 export type AppRoute = "neural" | "memory" | "actions" | "providers" | "diagnostics" | "settings";
+export type GalaxyViewMode = "cockpit" | "exploration";
 
 export interface TelemetryEntry {
   id: string;
@@ -75,7 +76,9 @@ interface NeuralState {
   recentActions: ActionSummary[];
   config: AppConfig;
   voiceStatus: VoiceStatus;
+  viewMode: GalaxyViewMode;
   setRoute: (route: AppRoute) => void;
+  setViewMode: (mode: GalaxyViewMode) => void;
   selectNode: (nodeId: string) => void;
   selectGalaxyObject: (objectId: string, context?: ActiveContext) => void;
   selectGalaxyConnection: (connectionId: string, context?: ActiveContext) => void;
@@ -132,7 +135,9 @@ export const useNeuralStore = create<NeuralState>((set) => ({
   recentActions: [],
   config: defaultAppConfig,
   voiceStatus: { state: "idle", isAvailable: false },
+  viewMode: "cockpit",
   setRoute: (route) => set({ route }),
+  setViewMode: (viewMode) => set({ viewMode }),
   selectNode: (nodeId) =>
     set((state) => {
       const objectItem = galaxyObjectById.get(nodeId);

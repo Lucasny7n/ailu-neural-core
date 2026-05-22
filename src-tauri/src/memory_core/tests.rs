@@ -178,6 +178,13 @@ fn capture_decision_rule_conversation_action_and_import_file() {
         .expect("capture action");
     assert_eq!(action.note.kind, MemoryNoteKind::Action);
 
+    let dream = capture::capture_dream(
+        "relacionar decisões recentes com memória visual".to_string(),
+        None,
+    )
+    .expect("capture dream");
+    assert_eq!(dream.note.kind, MemoryNoteKind::Dream);
+
     let import_source = root.join("source.txt");
     fs::write(&import_source, "registro tecnico importado").expect("write import source");
     let job =

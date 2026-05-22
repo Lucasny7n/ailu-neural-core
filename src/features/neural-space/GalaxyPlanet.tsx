@@ -36,13 +36,14 @@ export function GalaxyPlanet({ object, parent, selected, dimmed, onSelect }: Gal
       );
     }
     const pulse = Math.sin(state.clock.elapsedTime * 1.8 + seed) * 0.03;
-    groupRef.current.scale.setScalar((active ? 1.25 : 1) + pulse);
+    groupRef.current.scale.setScalar((object.displayScale ?? 1) * ((active ? 1.25 : 1) + pulse));
   });
 
   return (
     <group
       ref={groupRef}
       position={object.position}
+      scale={object.displayScale ?? 1}
       onPointerOver={(event) => {
         event.stopPropagation();
         setHovered(true);

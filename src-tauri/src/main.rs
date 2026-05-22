@@ -1,6 +1,6 @@
+mod ai_providers;
 mod memory_core;
 mod system_agent;
-mod ai_providers;
 
 fn main() {
     if let Err(error) = system_agent::db::init_database() {
@@ -41,6 +41,7 @@ fn main() {
             memory_core::memory_capture_decision,
             memory_core::memory_capture_rule,
             memory_core::memory_capture_action,
+            memory_core::memory_capture_dream,
             memory_core::memory_pin_note,
             memory_core::memory_unpin_note,
             memory_core::memory_forget_note,

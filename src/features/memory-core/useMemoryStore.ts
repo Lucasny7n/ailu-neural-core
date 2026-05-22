@@ -4,6 +4,7 @@ import {
   memoryCaptureAction,
   memoryCaptureConversation,
   memoryCaptureDecision,
+  memoryCaptureDream,
   memoryCaptureRule,
   memoryCreateNote,
   memoryDeleteNote,
@@ -63,6 +64,7 @@ interface MemoryState {
   captureDecision: (content: string, title?: string) => Promise<MemoryNoteDetail>;
   captureRule: (content: string, title?: string) => Promise<MemoryNoteDetail>;
   captureAction: (payloadJson: string, title?: string) => Promise<MemoryNoteDetail>;
+  captureDream: (content: string, title?: string) => Promise<MemoryNoteDetail>;
   pinNote: (noteId: string) => Promise<void>;
   unpinNote: (noteId: string) => Promise<void>;
   forgetNote: (noteId: string) => Promise<void>;
@@ -187,6 +189,12 @@ export const useMemoryStore = create<MemoryState>((set, get) => ({
 
   captureAction: async (payloadJson, title) => {
     const detail = await memoryCaptureAction(payloadJson, title);
+    setSelectedDetail(set, detail);
+    return detail;
+  },
+
+  captureDream: async (content, title) => {
+    const detail = await memoryCaptureDream(content, title);
     setSelectedDetail(set, detail);
     return detail;
   },

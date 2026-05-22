@@ -264,6 +264,7 @@ fn kind_boost(kind: MemoryNoteKind) -> f64 {
         MemoryNoteKind::Rule => 2.2,
         MemoryNoteKind::Project => 1.4,
         MemoryNoteKind::System => 1.2,
+        MemoryNoteKind::Dream => 1.0,
         MemoryNoteKind::Action => 0.8,
         MemoryNoteKind::Conversation => 0.5,
         _ => 0.0,

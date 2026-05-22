@@ -11,6 +11,7 @@ pub enum MemoryNoteKind {
     Decision,
     Action,
     Rule,
+    Dream,
     Import,
 }
 
@@ -24,6 +25,7 @@ impl MemoryNoteKind {
             Self::Decision => "decision",
             Self::Action => "action",
             Self::Rule => "rule",
+            Self::Dream => "dream",
             Self::Import => "import",
         }
     }
@@ -37,6 +39,7 @@ impl MemoryNoteKind {
             Self::Decision => "decisions",
             Self::Action => "actions",
             Self::Rule => "rules",
+            Self::Dream => "dreams",
             Self::Import => "imports",
         }
     }
@@ -54,6 +57,7 @@ impl FromStr for MemoryNoteKind {
             "decision" => Ok(Self::Decision),
             "action" => Ok(Self::Action),
             "rule" => Ok(Self::Rule),
+            "dream" => Ok(Self::Dream),
             "import" => Ok(Self::Import),
             other => Err(format!("invalid memory note kind: {other}")),
         }
@@ -83,7 +87,7 @@ pub struct MemoryConfig {
 impl Default for MemoryConfig {
     fn default() -> Self {
         Self {
-            vault_path: "~/.local/share/ailu-neural-core/memory-vault".to_string(),
+            vault_path: "~/.local/share/ailu-neural-core/memory".to_string(),
             auto_capture_conversations: true,
             auto_capture_actions: true,
             auto_capture_decisions: true,

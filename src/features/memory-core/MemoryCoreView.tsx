@@ -103,7 +103,7 @@ export function MemoryCoreView(): JSX.Element {
           <div className="memory-create-row">
             <input value={newTitle} onChange={(event) => setNewTitle(event.target.value)} placeholder="Nova nota..." />
             <select value={newKind} onChange={(event) => setNewKind(event.target.value as MemoryNoteKind)}>
-              {["note", "project", "system", "conversation", "decision", "action", "rule", "import"].map((item) => (
+              {["note", "project", "system", "conversation", "decision", "action", "rule", "dream", "import"].map((item) => (
                 <option key={item} value={item}>
                   {kindLabel(item as MemoryNoteKind)}
                 </option>
@@ -175,6 +175,7 @@ function kindLabel(kind: MemoryNoteKind): string {
     decision: "decisão",
     action: "ação",
     rule: "regra",
+    dream: "sonho",
     import: "arquivo",
   };
   return labels[kind];

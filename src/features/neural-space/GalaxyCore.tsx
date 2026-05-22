@@ -38,7 +38,7 @@ export function GalaxyCore({ object, selected, approvalActive, onSelect }: Galax
     <group
       ref={groupRef}
       position={object.position}
-      scale={1.5}
+      scale={(object.displayScale ?? 1) * 1.22}
       onPointerOver={(event) => {
         event.stopPropagation();
         setHovered(true);
@@ -53,12 +53,12 @@ export function GalaxyCore({ object, selected, approvalActive, onSelect }: Galax
       
       <group ref={innerRef}>
         <mesh>
-          <icosahedronGeometry args={[1.4, 4]} />
-          <meshStandardMaterial color="#000206" emissive={color} emissiveIntensity={active ? 2.2 : 1.4} roughness={0} metalness={1} />
+          <icosahedronGeometry args={[1.18, 4]} />
+          <meshStandardMaterial color="#03111d" emissive={color} emissiveIntensity={active ? 1.8 : 1.05} roughness={0.1} metalness={0.85} />
         </mesh>
         <mesh>
-          <sphereGeometry args={[1.9, 64, 48]} />
-          <meshBasicMaterial color={color} transparent opacity={active ? 0.22 : 0.12} wireframe />
+          <sphereGeometry args={[1.65, 64, 48]} />
+          <meshBasicMaterial color={color} transparent opacity={active ? 0.18 : 0.1} wireframe />
         </mesh>
       </group>
 
@@ -83,6 +83,17 @@ export function GalaxyCore({ object, selected, approvalActive, onSelect }: Galax
           })}
         </group>
       ))}
+
+      {Array.from({ length: 18 }, (_, index) => {
+        const angle = (index / 18) * Math.PI * 2;
+        const orbit = 3.25 + (index % 3) * 0.28;
+        return (
+          <mesh key={`orbital-node-${index}`} position={[Math.cos(angle) * orbit, Math.sin(index * 1.1) * 0.46, Math.sin(angle) * orbit]}>
+            <sphereGeometry args={[index % 6 === 0 ? 0.09 : 0.055, 12, 8]} />
+            <meshBasicMaterial color={index % 6 === 0 ? "#f5fbff" : color} transparent opacity={active ? 0.9 : 0.55} />
+          </mesh>
+        );
+      })}
 
       <pointLight color={color} intensity={active ? 22 : 12} distance={35} />
       <pointLight color="#0f8cff" position={[2, 1.5, -1]} intensity={6} distance={20} />

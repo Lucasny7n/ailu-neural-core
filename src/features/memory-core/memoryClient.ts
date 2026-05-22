@@ -176,6 +176,13 @@ export async function memoryCaptureAction(payloadJson: string, title?: string): 
   return safeInvoke<MemoryNoteDetail>("memory_capture_action", { payloadJson, title });
 }
 
+export async function memoryCaptureDream(content: string, title?: string): Promise<MemoryNoteDetail> {
+  if (!isTauriRuntime()) {
+    return devCreateNote(title ?? "Sonho Neural", "dream", content);
+  }
+  return safeInvoke<MemoryNoteDetail>("memory_capture_dream", { content, title });
+}
+
 export async function memoryPinNote(noteId: string): Promise<MemoryNote> {
   if (!isTauriRuntime()) {
     const found = await memoryGetNote(noteId);
@@ -238,7 +245,7 @@ export function detectMemoryCapture(message: string): { kind: "decision" | "rule
 
 function defaultMemoryConfig(): MemoryConfig {
   return {
-    vaultPath: "~/.local/share/ailu-neural-core/memory-vault",
+    vaultPath: "~/.local/share/ailu-neural-core/memory",
     autoCaptureConversations: true,
     autoCaptureActions: true,
     autoCaptureDecisions: true,

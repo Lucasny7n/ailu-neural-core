@@ -185,6 +185,17 @@ pub fn memory_capture_action(
 }
 
 #[tauri::command(rename_all = "camelCase")]
+pub fn memory_capture_dream(
+    app: tauri::AppHandle,
+    content: String,
+    title: Option<String>,
+) -> MemoryResult<MemoryNoteDetail> {
+    let detail = capture::capture_dream(content, title)?;
+    let _ = app.emit("memory-capture-created", &detail);
+    Ok(detail)
+}
+
+#[tauri::command(rename_all = "camelCase")]
 pub fn memory_pin_note(note_id: String) -> MemoryResult<MemoryNote> {
     indexer::pin_note(note_id, true)
 }

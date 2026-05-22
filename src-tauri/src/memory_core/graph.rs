@@ -188,6 +188,7 @@ fn insert_kind_edges(conn: &Connection, now: &str) -> MemoryResult<()> {
     for kind in [
         "decision",
         "rule",
+        "dream",
         "action",
         "conversation",
         "system",

@@ -96,6 +96,7 @@ function kindLabel(kind: MemoryNote["kind"]): string {
     decision: "decisão",
     action: "ação",
     rule: "regra",
+    dream: "sonho",
     import: "arquivo",
   };
   return labels[kind];

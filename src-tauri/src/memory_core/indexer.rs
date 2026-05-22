@@ -159,6 +159,7 @@ pub fn create_note(
                 | MemoryNoteKind::Rule
                 | MemoryNoteKind::Conversation
                 | MemoryNoteKind::Action
+                | MemoryNoteKind::Dream
         ),
     )?;
     let note = index_note_path(&path)?;

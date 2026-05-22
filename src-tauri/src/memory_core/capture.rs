@@ -57,6 +57,16 @@ pub fn capture_action(
     write_capture(title, MemoryNoteKind::Action, body)
 }
 
+pub fn capture_dream(content: String, title: Option<String>) -> MemoryResult<MemoryNoteDetail> {
+    let clean = content.trim();
+    let title = title.unwrap_or_else(|| title_from("Sonho", clean));
+    let body = format!(
+        "{}\n\n## Garantias\n\n- sugestao de curadoria gerada a partir de memoria local disponivel\n- nenhum comando real executado\n- nenhuma memoria apagada\n\n## Relacionado\n\n- [[Ailu Neural Core]]\n- [[Memoria]]\n",
+        clean
+    );
+    write_capture(title, MemoryNoteKind::Dream, body)
+}
+
 fn write_capture(
     title: String,
     kind: MemoryNoteKind,
