@@ -11,14 +11,14 @@ export function ActionsView(): JSX.Element {
   useEffect(() => {
     listRecentActions(80)
       .then(setRecentActions)
-      .catch(() => addTelemetry({ level: "warn", message: "Historico SQLite indisponivel fora do Tauri." }));
+      .catch(() => addTelemetry({ level: "warn", message: "Histórico SQLite indisponível fora do Tauri." }));
   }, [addTelemetry, setRecentActions]);
 
   return (
     <main className="route-view">
       <header className="route-header">
         <div>
-          <span>ACTIONS</span>
+          <span>Ações</span>
           <h1>Histórico operacional</h1>
         </div>
         <button type="button" onClick={() => listRecentActions(80).then(setRecentActions)}>
@@ -57,7 +57,7 @@ export function ActionsView(): JSX.Element {
             <article key={log.id} className="log-card">
               <div className="card-row compact">
                 <strong>{log.command}</strong>
-                <span>exit {log.exitCode}</span>
+                <span>saída {log.exitCode}</span>
                 <span>{log.durationMs}ms</span>
               </div>
               <pre>{[log.stdout, log.stderr].filter(Boolean).join("\n")}</pre>

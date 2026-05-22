@@ -11,8 +11,8 @@ describe("createFallbackPlan", () => {
     expect(plan.commands.every((command) => !command.destructive)).toBe(true);
   });
 
-  it("nao coloca remocao real no plano inicial do Steam", () => {
-    const plan = createFallbackPlan("prepara remocao do steam", defaultAppConfig);
+  it("não coloca remoção real no plano inicial do Steam", () => {
+    const plan = createFallbackPlan("prepara remoção do steam", defaultAppConfig);
     expect(plan.riskLevel).toBe("high");
     expect(plan.commands.map((command) => command.command).join("\n")).not.toContain("pacman -R");
   });

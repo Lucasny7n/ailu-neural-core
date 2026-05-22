@@ -10,7 +10,7 @@ const diagnostics = [
   ["ram-zram", "RAM/ZRAM"],
   ["disk", "Disco"],
   ["gpu", "GPU"],
-  ["audio", "Audio"],
+  ["audio", "Áudio"],
   ["network", "Rede"],
   ["bluetooth", "Bluetooth"],
   ["ollama", "Ollama"],
@@ -29,15 +29,15 @@ export function DiagnosticsView(): JSX.Element {
   }, [setSnapshot]);
 
   async function handleDiagnostic(key: string): Promise<void> {
-    addTelemetry({ level: "info", message: `Diagnostico iniciado: ${key}` });
+    addTelemetry({ level: "info", message: `Diagnóstico iniciado: ${key}` });
     try {
       const result = await runSafeDiagnostic(key);
       addDiagnostic(result);
-      addTelemetry({ level: result.status === "success" ? "success" : "warn", message: `${result.title}: concluido.` });
+      addTelemetry({ level: result.status === "success" ? "success" : "warn", message: `${result.title}: concluído.` });
     } catch (error) {
       addTelemetry({
         level: "error",
-        message: error instanceof Error ? error.message : "Diagnostico falhou.",
+        message: error instanceof Error ? error.message : "Diagnóstico falhou.",
       });
     }
   }
@@ -46,7 +46,7 @@ export function DiagnosticsView(): JSX.Element {
     <main className="route-view">
       <header className="route-header">
         <div>
-          <span>DIAGNOSTICS</span>
+          <span>Diagnósticos</span>
           <h1>Leitura segura do sistema</h1>
         </div>
         <button type="button" onClick={() => getSystemSnapshot().then(setSnapshot)}>
@@ -93,7 +93,7 @@ function SnapshotCard({ title, value }: { title: string; value?: string }): JSX.
   return (
     <article className="data-card">
       <span>{title}</span>
-      <strong>{value?.trim() || "indisponivel"}</strong>
+      <strong>{value?.trim() || "indisponível"}</strong>
     </article>
   );
 }

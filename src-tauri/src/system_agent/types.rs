@@ -93,6 +93,14 @@ pub struct AppConfig {
     pub default_model: String,
     pub ollama_base_url: String,
     pub theme: String,
+    #[serde(default = "default_galaxy_quality")]
+    pub galaxy_quality: String,
+    #[serde(default = "default_particle_density")]
+    pub particle_density: String,
+    #[serde(default = "default_true")]
+    pub show_secondary_connections: bool,
+    #[serde(default = "default_true")]
+    pub show_orbits: bool,
     pub reduced_motion: bool,
     pub max_particles: u32,
     pub enable_command_execution: bool,
@@ -106,12 +114,28 @@ impl Default for AppConfig {
             default_model: "qwen2.5-coder:1.5b".to_string(),
             ollama_base_url: "http://localhost:11434".to_string(),
             theme: "neural-dark".to_string(),
+            galaxy_quality: default_galaxy_quality(),
+            particle_density: default_particle_density(),
+            show_secondary_connections: true,
+            show_orbits: true,
             reduced_motion: false,
             max_particles: 700,
             enable_command_execution: true,
             require_approval_for_all_actions: true,
         }
     }
+}
+
+fn default_galaxy_quality() -> String {
+    "high".to_string()
+}
+
+fn default_particle_density() -> String {
+    "medium".to_string()
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

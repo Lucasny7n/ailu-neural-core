@@ -42,8 +42,8 @@ export const localMemoryGraphService: MemoryGraphService = {
     );
     return {
       summary: edges.length
-        ? "Contexto encontrado na memoria operacional local."
-        : "Sem memoria operacional relacionada ainda.",
+        ? "Contexto encontrado na memória operacional local."
+        : "Sem memória operacional relacionada ainda.",
       edges,
       relatedNodes: [...new Set(edges.flatMap((edge) => [edge.fromNode, edge.toNode]))],
     };

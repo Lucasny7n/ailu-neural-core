@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { PlannedCommand, SystemActionPlan } from "../ai-router/aiTypes";
 import { executeApprovedAction, recordSystemAction } from "../system-agent/systemAgentClient";
 import { useNeuralStore } from "../../store/useNeuralStore";
+import { galaxyObjectById } from "../neural-space/galaxyGraph";
 import { emitNeuralEvent } from "../neural-space/neuralEvents";
 
 export function ApprovalLayer(): JSX.Element | null {
@@ -38,7 +39,7 @@ function ApprovalDialog({ initialPlan }: { initialPlan: SystemActionPlan }): JSX
 
   async function handleCopy(): Promise<void> {
     await navigator.clipboard.writeText(commandText);
-    addTelemetry({ level: "success", message: "Comandos copiados para a area de transferencia." });
+    addTelemetry({ level: "success", message: "Comandos copiados para a área de transferência." });
   }
 
   async function handleCancel(): Promise<void> {
@@ -48,14 +49,14 @@ function ApprovalDialog({ initialPlan }: { initialPlan: SystemActionPlan }): JSX
     try {
       await recordSystemAction(draftPlan, "canceled");
     } catch {
-      // Cancelamento em preview web nao tem persistencia local.
+      // Cancelamento em preview web não tem persistência local.
     }
     addTelemetry({ level: "warn", message: "Plano cancelado pelo operador." });
   }
 
   async function handleExecute(): Promise<void> {
     if (!config.enableCommandExecution) {
-      addTelemetry({ level: "warn", message: "Execucao desabilitada nas configuracoes." });
+      addTelemetry({ level: "warn", message: "Execução desabilitada nas configurações." });
       return;
     }
     setRunning(true);
@@ -67,7 +68,7 @@ function ApprovalDialog({ initialPlan }: { initialPlan: SystemActionPlan }): JSX
     try {
       await recordSystemAction(draftPlan, "approved");
     } catch {
-      addTelemetry({ level: "warn", message: "Aprovacao sem persistencia Tauri." });
+      addTelemetry({ level: "warn", message: "Aprovação sem persistência Tauri." });
     }
 
     try {
@@ -103,13 +104,14 @@ function ApprovalDialog({ initialPlan }: { initialPlan: SystemActionPlan }): JSX
 
   return (
     <div className="approval-backdrop" role="dialog" aria-modal="true" aria-labelledby="approval-title">
-      <section className="approval-panel">
+      <section className="approval-panel hud-corners">
         <div className="approval-header">
           <div>
-            <div className="hud-kicker">APPROVAL LAYER</div>
+            <div className="hud-kicker">Evento crítico de autorização</div>
             <h2 id="approval-title">AGUARDANDO AUTORIZAÇÃO DO OPERADOR</h2>
+            <p>Nenhuma alteração será executada sem confirmação explícita.</p>
           </div>
-          <span className={`risk-badge risk-${draftPlan.riskLevel}`}>{draftPlan.riskLevel}</span>
+        <span className={`risk-badge risk-${draftPlan.riskLevel}`}>{riskLabel(draftPlan.riskLevel)}</span>
         </div>
 
         <div className="approval-grid">
@@ -127,7 +129,7 @@ function ApprovalDialog({ initialPlan }: { initialPlan: SystemActionPlan }): JSX
           </div>
           <div>
             <span>Destino neural</span>
-            <strong>{draftPlan.targetNodes.join(", ") || "core"}</strong>
+            <strong>{draftPlan.targetNodes.map(targetLabel).join(", ") || "Núcleo"}</strong>
           </div>
         </div>
 
@@ -154,16 +156,16 @@ function ApprovalDialog({ initialPlan }: { initialPlan: SystemActionPlan }): JSX
 
         <div className="approval-actions">
           <button type="button" className="execute-button" onClick={handleExecute} disabled={running}>
-            {running ? "Executando" : "Executar"}
-          </button>
-          <button type="button" onClick={handleCancel} disabled={running}>
-            Cancelar
-          </button>
-          <button type="button" onClick={handleCopy}>
-            Copiar comandos
+            {running ? "EXECUTANDO" : "AUTORIZAR EXECUÇÃO"}
           </button>
           <button type="button" onClick={() => setEditing((current) => !current)} disabled={running}>
-            {editing ? "Bloquear edição" : "Editar comandos"}
+            {editing ? "BLOQUEAR EDIÇÃO" : "EDITAR PLANO"}
+          </button>
+          <button type="button" onClick={handleCopy}>
+            COPIAR COMANDOS
+          </button>
+          <button type="button" onClick={handleCancel} disabled={running}>
+            CANCELAR
           </button>
         </div>
       </section>
@@ -175,7 +177,7 @@ function MetaBlock({ title, values }: { title: string; values: string[] }): JSX.
   return (
     <div>
       <span>{title}</span>
-      <strong>{values.length ? values.join(", ") : "nenhum"}</strong>
+        <strong>{values.length ? values.join(", ") : "nenhum"}</strong>
     </div>
   );
 }
@@ -196,7 +198,7 @@ function CommandEditor({
       <div className="command-meta">
         <span>#{index + 1}</span>
         <strong>{command.description}</strong>
-        <em>{command.requiresSudo ? "sudo" : "user"} / {command.destructive ? "destructive" : "safe"}</em>
+        <em>{command.requiresSudo ? "sudo" : "usuário"} / {command.destructive ? "destrutivo" : "seguro"}</em>
       </div>
       {editing ? (
         <textarea value={command.command} onChange={(event) => onChange(event.target.value)} rows={2} />
@@ -205,4 +207,18 @@ function CommandEditor({
       )}
     </div>
   );
+}
+
+function riskLabel(level: string): string {
+  const labels: Record<string, string> = {
+    low: "baixo",
+    medium: "médio",
+    high: "alto",
+    critical: "crítico",
+  };
+  return labels[level] ?? level;
+}
+
+function targetLabel(nodeId: string): string {
+  return galaxyObjectById.get(nodeId)?.label ?? nodeId;
 }

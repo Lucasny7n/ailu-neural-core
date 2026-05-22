@@ -1,5 +1,5 @@
 import type { AppConfig } from "../config/configTypes";
-import type { AiProviderStatus, OllamaModel } from "./aiTypes";
+import type { AiModel, AiProviderStatus } from "./aiTypes";
 
 interface OllamaTagsResponse {
   models?: Array<{
@@ -34,9 +34,9 @@ export async function getOllamaStatus(config: AppConfig): Promise<AiProviderStat
       providerId: "ollama-local",
       status: hasDefaultModel || models.length > 0 ? "ready" : "not_configured",
       message: hasDefaultModel
-        ? "Ollama local pronto com modelo padrao instalado."
+        ? "Ollama local pronto com modelo padrão instalado."
         : models.length > 0
-          ? "Ollama local responde, mas o modelo padrao nao foi encontrado."
+          ? "Ollama local responde, mas o modelo padrão não foi encontrado."
           : "Ollama local responde sem modelos instalados.",
       models,
     };
@@ -44,7 +44,7 @@ export async function getOllamaStatus(config: AppConfig): Promise<AiProviderStat
     return {
       providerId: "ollama-local",
       status: "unavailable",
-      message: error instanceof Error ? error.message : "Ollama indisponivel.",
+      message: error instanceof Error ? error.message : "Ollama indisponível.",
       models: [],
     };
   }
@@ -92,12 +92,12 @@ async function fetchWithTimeout(
   }
 }
 
-function normalizeModels(payload: OllamaTagsResponse): OllamaModel[] {
+function normalizeModels(payload: OllamaTagsResponse): AiModel[] {
   return (payload.models ?? [])
     .filter((model) => typeof model.name === "string")
     .map((model) => ({
       name: model.name ?? "",
-      modifiedAt: model.modified_at,
-      size: model.size,
+      id: model.name ?? "",
+      details: model.size ? `${Math.round(model.size / 1024 / 1024 / 1024 * 100) / 100} GB` : undefined,
     }));
 }

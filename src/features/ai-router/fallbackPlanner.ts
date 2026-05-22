@@ -24,14 +24,14 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
       description: "Coleta estado do controlador, bloqueios rfkill e unidades relacionadas.",
       intent: "diagnose",
       riskLevel: "low",
-      riskSummary: "Somente leitura; nao altera adaptadores nem servicos.",
+      riskSummary: "Somente leitura; não altera adaptadores nem serviços.",
       targetNodes: ["bluetooth", "bt-rfkill", "bt-controller", "systemd"],
       affectedServices: ["bluetooth.service"],
       commands: [
         cmd("bluetoothctl show", "Verifica controlador Bluetooth.", 10_000),
         cmd("bluetoothctl list", "Lista controladores detectados.", 10_000),
         cmd("rfkill list", "Procura bloqueios de radio.", 10_000),
-        cmd("systemctl status bluetooth --no-pager", "Confere estado do servico Bluetooth.", 10_000),
+        cmd("systemctl status bluetooth --no-pager", "Confere estado do serviço Bluetooth.", 10_000),
       ],
     });
   }
@@ -54,7 +54,7 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
 
   if (normalized.includes("servi") && normalized.includes("falh")) {
     return buildPlan(userRequest, config, {
-      title: "Verificar servicos falhando",
+      title: "Verificar serviços falhando",
       description: "Consulta unidades systemd em falha.",
       intent: "diagnose",
       riskLevel: "low",
@@ -70,7 +70,7 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
   if (normalized.includes("ollama")) {
     return buildPlan(userRequest, config, {
       title: "Verificar Ollama local",
-      description: "Consulta modelos instalados e estado do servico local.",
+      description: "Consulta modelos instalados e estado do serviço local.",
       intent: "diagnose",
       riskLevel: "low",
       riskSummary: "Somente leitura; nao baixa modelos.",
@@ -78,7 +78,7 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
       affectedServices: ["ollama.service"],
       commands: [
         cmd("ollama list", "Lista modelos locais instalados.", 15_000),
-        cmd("systemctl status ollama --no-pager", "Confere servico Ollama se existir.", 10_000),
+        cmd("systemctl status ollama --no-pager", "Confere serviço Ollama se existir.", 10_000),
       ],
     });
   }
@@ -86,13 +86,13 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
   if (normalized.includes("ram") || normalized.includes("zram") || normalized.includes("memoria")) {
     return buildPlan(userRequest, config, {
       title: "Diagnosticar RAM e ZRAM",
-      description: "Coleta uso de memoria, swap e dispositivos zram.",
+      description: "Coleta uso de memória, swap e dispositivos zram.",
       intent: "diagnose",
       riskLevel: "low",
-      riskSummary: "Somente leitura de memoria e swap.",
+      riskSummary: "Somente leitura de memória e swap.",
       targetNodes: ["ram-zram", "swapon", "zramctl"],
       commands: [
-        cmd("free -h", "Resume memoria usada e total.", 8_000),
+        cmd("free -h", "Resume memória usada e total.", 8_000),
         cmd("swapon --show", "Mostra swap ativo.", 8_000),
         cmd("zramctl", "Mostra dispositivos zram.", 8_000),
       ],
@@ -116,10 +116,10 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
     });
   }
 
-  if (normalized.includes("steam") && (normalized.includes("remove") || normalized.includes("remo"))) {
+  if (normalized.includes("steam") && (normalized.includes("remove") || normalized.includes("remo") || normalized.includes("apaga") || normalized.includes("apagar"))) {
     return buildPlan(userRequest, config, {
-      title: "Preparar remocao do Steam",
-      description: "Mapeia pacotes e dados antes de qualquer remocao real.",
+      title: "Preparar remoção do Steam",
+      description: "Mapeia pacotes e dados antes de qualquer remoção real.",
       intent: "remove",
       riskLevel: "high",
       riskSummary: "Remover Steam pode afetar bibliotecas e dados; este plano inicial apenas diagnostica.",
@@ -129,18 +129,18 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
       commands: [
         cmd("pacman -Qs steam", "Lista pacotes Steam instalados.", 10_000),
         cmd("du -sh ~/.steam ~/.local/share/Steam 2>/dev/null || true", "Estima tamanho dos dados locais.", 15_000),
-        cmd("printf '%s\\n' 'Edite este plano para adicionar remocao real apos revisar bibliotecas e saves.'", "Marca etapa manual obrigatoria.", 5_000),
+        cmd("printf '%s\\n' 'Edite este plano para adicionar remoção real após revisar bibliotecas e saves.'", "Marca etapa manual obrigatória.", 5_000),
       ],
     });
   }
 
   if (normalized.includes("hydra")) {
     return buildPlan(userRequest, config, {
-      title: "Preparar instalacao do Hydra Launcher",
-      description: "Consulta disponibilidade antes de qualquer instalacao.",
+      title: "Preparar instalação do Hydra Launcher",
+      description: "Consulta disponibilidade antes de qualquer instalação.",
       intent: "install",
       riskLevel: "medium",
-      riskSummary: "Instalacao de pacotes muda o sistema; este plano inicial apenas consulta.",
+      riskSummary: "Instalação de pacotes muda o sistema; este plano inicial apenas consulta.",
       targetNodes: ["packages", "actions"],
       affectedPackages: ["hydra-launcher"],
       commands: [
@@ -161,7 +161,7 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
       affectedServices: ["pipewire.service", "pipewire-pulse.service", "wireplumber.service"],
       commands: [
         cmd("systemctl --user status pipewire pipewire-pulse wireplumber --no-pager", "Coleta estado antes do restart.", 10_000),
-        cmd("systemctl --user restart pipewire pipewire-pulse wireplumber", "Reinicia servicos de audio do usuario.", 20_000),
+        cmd("systemctl --user restart pipewire pipewire-pulse wireplumber", "Reinicia serviços de áudio do usuário.", 20_000),
         cmd("wpctl status", "Valida grafo de audio apos restart.", 10_000),
       ],
     });
@@ -170,7 +170,7 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
   if (normalized.includes("pacman") && normalized.includes("cache")) {
     return buildPlan(userRequest, config, {
       title: "Analisar cache do pacman",
-      description: "Prepara limpeza com etapa seca antes da remocao real.",
+      description: "Prepara limpeza com etapa seca antes da remoção real.",
       intent: "optimize",
       riskLevel: "medium",
       riskSummary: "Limpeza real remove cache de pacotes; comando inicial usa dry-run.",
@@ -198,7 +198,7 @@ export function createFallbackPlan(userRequest: string, config: AppConfig): Syst
   }
 
   return buildPlan(userRequest, config, {
-    title: "Plano de diagnostico seguro",
+    title: "Plano de diagnóstico seguro",
     description: "Coleta informacoes gerais sem alterar o sistema.",
     intent: "diagnose",
     riskLevel: "low",
@@ -228,7 +228,7 @@ function buildPlan(userRequest: string, config: AppConfig, input: FallbackPlanIn
     targetNodes: input.targetNodes,
     requiresConfirmation: true,
     model: config.defaultModel,
-    provider: config.defaultProvider,
+    provider: config.aiProviderType,
     createdAt: new Date().toISOString(),
   };
 }

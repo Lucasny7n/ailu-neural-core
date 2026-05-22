@@ -1,53 +1,76 @@
-# Architecture
+# Arquitetura
 
 ## Frontend
 
-- React + TypeScript + Vite
-- React Three Fiber, Three.js and Drei for the neural scene
-- Zustand for UI state
-- CSS global tokens and HUD surfaces
+- React, TypeScript e Vite.
+- React Three Fiber, Three.js e Drei para a Galáxia Neural 3D.
+- Zustand para estado global.
+- CSS global para HUD, cockpit e responsividade.
 
-Key areas:
+Áreas principais:
 
-- `src/features/neural-space/`: 3D graph, HUD panels, operator console and neural events.
-- `src/features/ai-router/`: Ollama client, planner prompt, structured parser and fallback planner.
-- `src/features/approval/`: mandatory authorization overlay.
-- `src/features/system-agent/`: Tauri client wrappers and system types.
-- `src/features/memory-graph/`: Graphiti-ready memory service abstraction.
+- `src/features/neural-space/`: Galáxia Neural, objetos 3D, conexões, contexto ativo, painéis e console.
+- `src/features/ai-router/`: Intent Engine, resposta conversacional, Ollama, prompt de planejamento, parser e fallback planner.
+- `src/features/approval/`: camada de autorização obrigatória.
+- `src/features/system-agent/`: cliente Tauri para diagnóstico e execução aprovada.
+- `src/features/memory-core/`: vault local, store, UI de notas, busca, importação, grafo e contexto.
+- `src/features/memory-graph/`: serviço pequeno para relações operacionais locais.
 
 ## Backend
 
-- Tauri v2
-- Rust command handlers
-- SQLite through `rusqlite`
-- Local config in `~/.config/ailu-neural-core/config.json`
-- Operational database in `~/.local/share/ailu-neural-core/ailu-neural-core.sqlite`
+- Tauri v2.
+- Rust.
+- SQLite via `rusqlite`.
+- Config local: `~/.config/ailu-neural-core/config.json`.
+- Banco local: `~/.local/share/ailu-neural-core/ailu-neural-core.sqlite`.
 
-Backend modules:
+Módulos:
 
-- `diagnostics.rs`: safe read-only command registry.
-- `executor.rs`: approved sequential command executor.
-- `db.rs`: SQLite schema, action logs, config and memory edges.
-- `commands.rs`: Tauri invoke surface.
+- `diagnostics.rs`: comandos seguros de leitura.
+- `executor.rs`: executor sequencial com token de aprovação.
+- `db.rs`: schema SQLite, logs, ações, config e relações.
+- `commands.rs`: superfície Tauri.
+- `src-tauri/src/memory_core/`: vault, parser, chunker, indexer, linker, grafo, busca, contexto, captura e importação.
 
-## Data Flow
+## Fluxo de Comando
 
-1. Operator command enters `OperatorCommandConsole`.
-2. `aiRouter` checks Ollama status.
-3. Ollama generates JSON or fallback planner creates a safe local plan.
-4. Plan is stored in UI state and recorded in SQLite when Tauri is available.
-5. `ApprovalLayer` shows commands and allows edits.
-6. Execution sends `approval:<actionId>` to Rust.
-7. Rust validates the token, runs commands one by one and saves logs.
-8. UI updates telemetry, node states and memory edges.
+1. O operador digita no `ContextAwareCommandConsole`.
+2. `intentRouter` classifica a mensagem.
+3. `resolveIntentWithActiveContext` decide se o Contexto Ativo deve ser usado ou ignorado.
+4. `memory_build_context` recupera memórias reais quando disponível.
+5. Conversa, explicação, feedback e navegação respondem direto na UI.
+6. Diagnóstico seguro chama leitura Tauri sem Approval.
+7. Ação real chama `aiRouter`.
+8. `aiRouter` usa Ollama ou fallback local.
+9. `ApprovalLayer` exibe o plano.
+10. O executor Rust só roda depois de autorização explícita.
+11. Logs, ações e memórias são persistidos quando Tauri está disponível.
 
-## Graphiti-Ready Memory
+## Galáxia Neural
 
-`MemoryGraphService` is intentionally small:
+`galaxyGraph.ts` define objetos e conexões:
 
-- `addEpisode`
-- `addEdge`
-- `getRelatedNodes`
-- `getActionContext`
+- `GalaxyObject`: núcleo, estrela, planeta, memória, componente, ação ou conexão.
+- `GalaxyConnection`: cabo 3D com relação, força e cor.
+- `ActiveContext`: objeto selecionado que orienta respostas referenciais.
 
-The MVP persists simple edges in SQLite. A future Graphiti backend can replace this implementation without changing the UI contract.
+A cena 3D usa:
+
+- câmera perspectiva;
+- zoom/orbit/drag;
+- órbitas;
+- cabos curvos;
+- partículas viajando;
+- foco suave de câmera;
+- clique em objeto e conexão.
+
+## Memory Core na Galáxia
+
+Quando `memory_get_graph` retorna dados reais, notas e arquivos viram corpos roxos no campo de memória. Se o vault está vazio, apenas a estrutura base aparece e a UI informa que não há memória indexada.
+
+## Limites Atuais
+
+- Busca de memória é lexical/FTS com fallback LIKE.
+- Embeddings são opcionais e não obrigatórios.
+- Graphiti real ainda não está integrado.
+- Multiagentes e execução autônoma estão fora do MVP.

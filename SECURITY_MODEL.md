@@ -1,51 +1,82 @@
-# Security Model
+# Modelo de Segurança
 
-Ailu Neural Core follows a strict local approval model.
+Ailu Neural Core segue um modelo local de aprovação explícita.
 
-## Rules
+## Regras
 
-- AI plans only.
-- Operator approves.
-- Executor runs.
-- Logs are saved.
-- No command runs hidden in the background.
-- No remote executor endpoint exists.
-- No `sudo` is used by the implementation itself.
+- IA planeja.
+- Operador revisa.
+- Approval Layer autoriza.
+- Executor roda apenas depois da autorização.
+- Logs são salvos.
+- Nenhum comando roda escondido.
+- Nenhum endpoint remoto de execução existe.
+- O app não usa `sudo` automaticamente.
+- Conversa, pergunta, explicação, feedback e navegação nunca abrem Approval.
+- Diagnósticos seguros podem rodar sem Approval porque são leitura.
+- Ações reais sempre abrem Approval.
+- Captura de memória escreve só no vault configurado.
+- Importação de memória lê caminhos fornecidos pelo operador e não executa conteúdo.
 
-## Approval Token
+## Contexto Ativo
 
-The frontend sends an approval token in the format:
+O Contexto Ativo melhora respostas curtas, mas não substitui segurança.
+
+Usa o contexto quando o pedido é referencial:
+
+- `resuma isso`
+- `explica`
+- `isso está normal?`
+- `quais decisões existem aqui?`
+
+Ignora o contexto quando há alvo claro diferente:
+
+- `apaga steam`
+- `reinicia pipewire`
+- `diagnostica bluetooth`
+- `mostra gpu`
+
+Isso evita que um arquivo selecionado vire alvo acidental de uma ação de sistema.
+
+## Token de Aprovação
+
+O frontend envia:
 
 ```txt
 approval:<actionId>
 ```
 
-The Rust executor rejects command execution if the token does not match the action id.
+O Rust executor rejeita execução se o token não corresponder ao plano.
 
-This is a local flow gate, not a cryptographic security boundary. The main protection is explicit UI review plus a local-only Tauri command surface.
+Esse gate é local e não pretende ser fronteira criptográfica. A proteção principal é revisão explícita na UI, comandos visíveis e superfície Tauri local.
 
-## Destructive Commands
+## Comandos Destrutivos
 
-The MVP allows the operator to approve edited commands, but the UI surfaces:
+Planos mostram:
 
-- risk level;
-- destructive flag;
-- sudo flag;
-- affected files;
-- affected packages;
-- affected services.
+- nível de risco;
+- flag destrutiva;
+- sudo;
+- arquivos afetados;
+- pacotes afetados;
+- serviços afetados.
 
-Fallback plans avoid immediate destructive package removal for high-risk requests such as Steam removal. They start with diagnostics and require manual command edits for irreversible operations.
+Planos de alto risco, como remoção do Steam, começam por diagnóstico e exigem edição manual para qualquer remoção real.
 
-## Persistence
+## Persistência
 
-SQLite stores:
+SQLite armazena:
 
-- action plans;
-- command logs;
-- approvals;
-- system snapshots;
-- neural graph events;
-- memory edges.
+- planos;
+- logs;
+- aprovações;
+- snapshots;
+- eventos do grafo;
+- relações;
+- notas, chunks, tags, aliases, links, usos de contexto e importações.
 
-API keys are not required in the current MVP and are not stored.
+## Vault de Memória
+
+O Memory Core cria `.ailu/.ailuignore` para bloquear secrets, bancos, build output, binários, mídia e arquivos grandes. Caminhos são normalizados e traversal `../` é rejeitado em operações relativas ao vault.
+
+Não há sync cloud, indexação remota ou dependência externa obrigatória.

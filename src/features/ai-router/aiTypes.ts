@@ -40,30 +40,38 @@ export interface SystemActionPlan {
   createdAt: string;
 }
 
+export type ProviderType =
+  | "openclaude-cli"
+  | "openai-compatible"
+  | "ollama-legacy"
+  | "disabled";
+
 export interface AiProviderConfig {
-  id: "ollama-local";
+  id: string;
   name: string;
-  type: "local";
-  baseUrl: string;
-  defaultModel: string;
+  type: ProviderType;
   enabled: boolean;
+  baseUrl?: string;
+  apiKey?: string;
+  defaultModel: string;
+  command?: string;
 }
 
-export interface OllamaModel {
+export interface AiModel {
   name: string;
-  modifiedAt?: string;
-  size?: number;
+  id: string;
+  details?: string;
 }
 
 export interface AiProviderStatus {
   providerId: string;
   status: "ready" | "not_configured" | "unavailable" | "running" | "error";
   message: string;
-  models: OllamaModel[];
+  models: AiModel[];
 }
 
 export interface ActionPlanResult {
   plan: SystemActionPlan;
-  source: "ollama" | "fallback";
+  source: "ai" | "fallback";
   providerStatus: AiProviderStatus;
 }

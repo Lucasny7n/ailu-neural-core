@@ -29,6 +29,7 @@ tmp/
 
 # OS/editor
 .DS_Store
+.ailu-backups/
 Thumbs.db
 .idea/
 .vscode/*

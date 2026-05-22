@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { buildDefaultProvider, listProviderStatus } from "./aiRouter";
+import { listProviderStatus } from "./aiRouter";
 import type { AiProviderStatus } from "./aiTypes";
 import { useNeuralStore } from "../../store/useNeuralStore";
 
@@ -11,14 +11,12 @@ export function ProvidersView(): JSX.Element {
     listProviderStatus(config).then(setStatus);
   }, [config]);
 
-  const provider = buildDefaultProvider(config);
-
   return (
     <main className="route-view">
       <header className="route-header">
         <div>
-          <span>PROVIDERS</span>
-          <h1>Ollama Local</h1>
+          <span>Provedores de IA</span>
+          <h1>{config.aiProviderType.toUpperCase()}</h1>
         </div>
         <button type="button" onClick={() => listProviderStatus(config).then(setStatus)}>
           Testar conexão
@@ -27,34 +25,43 @@ export function ProvidersView(): JSX.Element {
 
       <section className="provider-panel">
         <div className="detail-grid">
-          <span>ID</span>
-          <strong>{provider.id}</strong>
-          <span>Endpoint</span>
-          <strong>{provider.baseUrl}</strong>
+          <span>Provedor</span>
+          <strong>{config.aiProviderType}</strong>
           <span>Modelo padrão</span>
-          <strong>{provider.defaultModel}</strong>
+          <strong>{config.defaultModel}</strong>
           <span>Status</span>
-          <strong>{status?.status ?? "testing"}</strong>
+          <strong>{statusLabel(status?.status)}</strong>
           <span>Mensagem</span>
-          <strong>{status?.message ?? "Verificando runtime local."}</strong>
+          <strong>{status?.message ?? "Verificando runtime."}</strong>
         </div>
       </section>
 
       <section className="data-grid">
         {(status?.models ?? []).length === 0 ? (
-          <div className="empty-state">Nenhum modelo retornado por /api/tags.</div>
+          <div className="empty-state">Nenhum modelo detectado para este provedor.</div>
         ) : (
           status?.models.map((model) => (
-            <article className="data-card" key={model.name}>
+            <article className="data-card" key={model.id}>
               <div className="card-row">
-                <span>ollama</span>
+                <span>modelo</span>
                 <strong>{model.name}</strong>
               </div>
-              <p>{model.size ? `${Math.round(model.size / 1024 / 1024)} MB` : "tamanho indisponivel"}</p>
+              <p>{model.details ?? "Sem detalhes extras"}</p>
             </article>
           ))
         )}
       </section>
     </main>
   );
+}
+
+function statusLabel(status: AiProviderStatus["status"] | undefined): string {
+  const labels: Record<AiProviderStatus["status"], string> = {
+    ready: "pronto",
+    not_configured: "não configurado",
+    unavailable: "indisponível",
+    running: "rodando",
+    error: "erro",
+  };
+  return status ? labels[status] : "testando";
 }

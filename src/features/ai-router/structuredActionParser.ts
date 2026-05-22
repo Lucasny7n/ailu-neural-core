@@ -51,8 +51,8 @@ export function normalizePlan(value: unknown): SystemActionPlan | null {
   return {
     id: stringOr(value.id, createId("plan")),
     userRequest: stringOr(value.userRequest ?? value.user_request, ""),
-    title: stringOr(value.title, "Plano de acao"),
-    description: stringOr(value.description, "Plano estruturado aguardando autorizacao."),
+    title: stringOr(value.title, "Plano de ação"),
+    description: stringOr(value.description, "Plano estruturado aguardando autorização."),
     intent,
     riskLevel,
     riskSummary: stringOr(value.riskSummary ?? value.risk_summary, "Risco nao detalhado."),

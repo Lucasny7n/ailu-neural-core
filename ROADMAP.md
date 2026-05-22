@@ -1,28 +1,31 @@
 # Roadmap
 
-## Next
+## Próximo
 
-- Real Graphiti integration behind `MemoryGraphService`.
-- Richer formatted diagnostics for CPU, RAM, ZRAM, GPU, disk, Hyprland and Ollama.
-- Live executor progress streaming instead of final batch logs.
-- Visual editor for safe Hyprland configuration proposals.
-- Better node search and keyboard navigation.
-- Persistent neural map expansion.
+- Refinar a Galáxia Neural com mais filtros visuais, busca de objetos e histórico de foco.
+- Melhorar o painel de memória real dentro da galáxia, incluindo tags como órbitas e backlinks mais visíveis.
+- Enriquecer diagnósticos formatados de CPU, RAM/ZRAM, GPU, disco, Hyprland, áudio e Ollama.
+- Streaming de progresso do executor em vez de logs finais em lote.
+- Revisão visual de configurações seguras do Hyprland antes de gerar planos.
+- File watcher do Memory Core com revisão de importação.
+- Diff de versões de notas no Memory Core.
+- Classificação local por modelo mantendo regras determinísticas de segurança.
 
-## Later
+## Depois
 
-- Voice input and local speech-to-text.
-- Computer vision for screenshots and UI inspection.
-- Multi-agent workers for system, code, fast, heavy and vision roles.
-- Plugin system for diagnostics and automation modules.
-- Deeper kernel and driver analysis.
-- More advanced rollback planning.
-- Operator profiles and saved approval policies.
+- Voz local e STT.
+- Visão computacional para screenshots e inspeção de UI.
+- Workers locais especializados por sistema, código, rápido, pesado e visão.
+- Plugins de diagnóstico e automação.
+- Integração Graphiti real por trás do contrato atual.
+- Rollback planning mais avançado.
+- Perfis de operador e políticas salvas de aprovação.
 
-## Not in MVP
+## Fora do MVP
 
-- Autonomous system repair.
-- Background command execution.
-- Secret storage for cloud providers.
-- Full Graphiti runtime.
-- OpenJarvis-compatible agent orchestration.
+- Reparo autônomo do sistema.
+- Execução em background sem operador.
+- Armazenamento de secrets cloud.
+- Memória cloud obrigatória.
+- Embeddings obrigatórios.
+- Execução automática vinda de conversa normal.

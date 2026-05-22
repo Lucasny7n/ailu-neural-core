@@ -1,117 +1,105 @@
 # Ailu Neural Core
 
-Ailu Neural Core is a local desktop MVP for a navigable 3D AI control surface. It combines a React Three Fiber neural space, an Ollama-based planning router, a mandatory Approval Layer, and a Tauri/Rust System Agent for safe local diagnostics and approved command execution.
+Ailu Neural Core é um cockpit local em Tauri/React/Rust para operar IA, memória e diagnóstico do sistema com uma Galáxia Neural 3D. O app é independente do `ailu-ai-studio`.
 
-The project is new and independent from `ailu-ai-studio`.
+## Estado Atual
 
-## Current MVP
+- Galáxia Neural 3D com núcleo central dominante, estrelas, planetas, órbitas, cabos vivos e partículas.
+- Seleção clicável de estrelas, planetas, memórias e conexões.
+- Contexto Ativo no store e no console do operador.
+- Intent Engine com regra explícita: pedidos referenciais usam o contexto ativo; ordens com outro alvo claro ignoram esse contexto.
+- Console em português para conversa, diagnóstico, ação, memória e exploração.
+- Memory Core local com vault Markdown, SQLite, busca, chunks, backlinks, grafo e contexto recuperado.
+- Approval Layer obrigatório para qualquer ação real.
+- Diagnósticos seguros de leitura podem rodar sem aprovação porque não alteram o sistema.
+- Provedores de IA configuráveis: Ollama local (legado), OpenClaude Bridge (opcional) e Compatível com OpenAI.
+- Voz nativa: Botão "Escutar" para transcrição e "Falar" para respostas da IA via Web Speech API.
+- Galáxia Neural 3D aprimorada: Núcleo maior, mais brilho, partículas densas e estética Cyberpunk profunda.
+- Contexto Ativo real: A IA utiliza o objeto selecionado para responder perguntas contextuais ("isso está normal?", "resuma").
 
-- 3D neural space with a central Ailu core, connected system nodes, orbit/zoom controls, node selection, connection travel, and progressive child nodes.
-- Operator command console that turns natural-language requests into structured `SystemActionPlan` objects.
-- Ollama Local provider support using `qwen2.5-coder:1.5b` at `http://localhost:11434`.
-- Local fallback planner for known Arch/Hyprland requests when Ollama is offline or returns invalid JSON.
-- Approval Layer that shows risk, affected files/packages/services, commands, provider/model, edit/copy/cancel/execute controls.
-- Tauri System Agent with safe diagnostics and approved command execution.
-- SQLite operational memory initialized at `~/.local/share/ailu-neural-core/ailu-neural-core.sqlite`.
-- Local config at `~/.config/ailu-neural-core/config.json`.
-
-## Install
+## Instalação
 
 ```bash
 npm install
 ```
 
-System requirements:
+Requisitos:
 
-- Node.js and npm
-- Rust and Cargo
-- Tauri v2 native dependencies for Linux
-- Optional: Ollama running locally
+- Node.js e npm
+- Rust e Cargo
+- Dependências nativas do Tauri v2 no Linux
+- Opcional: Ollama local
 
-## Development
+## Desenvolvimento
 
-Frontend only:
+Frontend:
 
 ```bash
 npm run dev
 ```
 
-Desktop app:
+Desktop:
 
 ```bash
 npm run tauri:dev
 ```
 
-## Build
-
-```bash
-npm run build
-npm run tauri:build
-```
-
-## Validation
+## Validação
 
 ```bash
 npm run lint
 npm run typecheck
 npm run test -- --run
 npm run build
+npm run test:ux
 cargo fmt --check --manifest-path src-tauri/Cargo.toml
 cargo check --manifest-path src-tauri/Cargo.toml
-cargo test --manifest-path src-tauri/Cargo.toml
+cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1
+git diff --check
 ```
 
-## Ollama
+## Galáxia Neural
 
-Default provider:
+A tela principal não é dashboard. Ela representa o sistema como uma galáxia operacional:
 
-```json
-{
-  "id": "ollama-local",
-  "baseUrl": "http://localhost:11434",
-  "defaultModel": "qwen2.5-coder:1.5b"
-}
+- Núcleo: Ailu Neural Core.
+- Estrelas: Memória, IA, Sistema, Interface, Hardware, CPU, GPU, RAM/ZRAM, Armazenamento, Conectividade, Áudio e Ações.
+- Planetas: notas, arquivos, decisões, Ollama, Kernel, Hyprland, PipeWire, planos, aprovações e outros subdomínios.
+- Conexões: relações entre memória, sistema, IA, hardware e ações.
+
+Ao clicar em um objeto, ele vira Contexto Ativo. O console mostra esse contexto e a IA usa isso em mensagens como `resuma isso`, `explica`, `isso está normal?` ou `quais decisões existem aqui?`.
+
+Se o operador pedir outro alvo claro, como `apaga steam`, `reinicia pipewire` ou `mostra gpu`, o contexto ativo é ignorado para evitar confusão operacional.
+
+## Memory Core
+
+O vault local fica em:
+
+```txt
+~/.local/share/ailu-neural-core/memory-vault/
 ```
 
-The router calls:
-
-- `GET /api/tags` for provider/model status.
-- `POST /api/generate` for JSON action planning.
-
-If Ollama is unavailable, the app uses a safe local rule-based planner.
+O Memory Core indexa Markdown/texto, gera chunks, backlinks, tags, grafo e contexto para respostas e planos. Se estiver vazio, a galáxia mostra o estado honesto: nenhuma memória indexada.
 
 ## Approval Layer
 
-The AI never executes commands directly. The flow is:
+A IA nunca executa comandos diretamente.
 
-1. Operator sends a natural-language order.
-2. AI Router creates a structured plan.
-3. Approval Layer displays risk, commands, services, packages, files and target neural nodes.
-4. Operator can edit commands.
-5. Only the `Executar` button sends commands to the Tauri executor.
-6. Execution logs are saved and shown in Telemetry.
+Fluxo:
 
-## System Agent
+1. Operador envia pedido.
+2. Intent Engine classifica.
+3. Se for conversa/pergunta/navegação, responde sem Approval.
+4. Se for diagnóstico seguro, roda apenas leitura.
+5. Se for ação real, AI Router cria um plano.
+6. Approval Layer mostra risco, comandos, pacotes, serviços e arquivos.
+7. Só `Autorizar execução` envia comandos ao executor Tauri.
 
-The Rust backend exposes local-only Tauri commands for:
+## Segurança
 
-- safe diagnostics such as `uname -a`, `free -h`, `systemctl --failed`, `journalctl`, `hyprctl`, `wpctl`, `ollama list`;
-- recording actions in SQLite;
-- executing approved command lists sequentially;
-- saving stdout, stderr, exit code and duration.
-
-No remote endpoint is created.
-
-## Neural Space
-
-The 3D scene is not decorative. Nodes and connections reflect planning and execution states:
-
-- ready
-- thinking
-- approval
-- running
-- success
-- warning
-- error
-
-The first graph includes Kernel, Systemd, Hyprland, Quickshell, Pacman/Yay, Ollama, Memory, Bluetooth, Network, Audio, GPU, RAM/ZRAM, Disk, Logs and Actions.
+- Sem execução escondida.
+- Sem `sudo` automático.
+- Sem endpoint remoto de execução.
+- Sem secrets no MVP.
+- Importação de memória não executa conteúdo importado.
+- Planos destrutivos começam por diagnóstico e exigem revisão explícita.

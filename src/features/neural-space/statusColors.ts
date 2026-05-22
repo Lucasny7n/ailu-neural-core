@@ -2,7 +2,7 @@ import type { NeuralNodeStatus } from "./neuralGraph";
 
 export const statusColors: Record<NeuralNodeStatus, string> = {
   idle: "#38d5ff",
-  ready: "#66f2b0",
+  ready: "#38d5ff",
   thinking: "#38d5ff",
   approval: "#ffb84d",
   running: "#198cff",
@@ -14,15 +14,15 @@ export const statusColors: Record<NeuralNodeStatus, string> = {
 
 export function statusLabel(status: NeuralNodeStatus): string {
   const labels: Record<NeuralNodeStatus, string> = {
-    idle: "IDLE",
-    ready: "READY",
-    thinking: "THINKING",
-    approval: "APPROVAL",
-    running: "RUNNING",
-    success: "SUCCESS",
-    warning: "WARNING",
-    danger: "DANGER",
-    error: "ERROR",
+    idle: "Ocioso",
+    ready: "Pronto",
+    thinking: "Processando",
+    approval: "Aprovação",
+    running: "Executando",
+    success: "Sucesso",
+    warning: "Aviso",
+    danger: "Perigo",
+    error: "Erro",
   };
   return labels[status];
 }

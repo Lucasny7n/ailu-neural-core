@@ -1,8 +1,10 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Mesh, Vector3 } from "three";
+import type { Mesh } from "three";
+import { Vector3 } from "three";
 import type { NeuralConnection, NeuralNode } from "./neuralGraph";
 import { statusColors } from "./statusColors";
+import { buildCablePath } from "./travelPath";
 
 interface NeuralParticlesProps {
   connections: NeuralConnection[];
@@ -28,16 +30,18 @@ export function NeuralParticles({
         if (!from || !to) {
           return null;
         }
-        return (
+        const focused = focusedConnectionId === connection.id;
+        const count = focused ? 4 : connection.strength > 0.8 ? 2 : 1;
+        return Array.from({ length: count }, (_, particleIndex) => (
           <ConnectionParticle
-            key={connection.id}
+            key={`${connection.id}-${particleIndex}`}
             connection={connection}
             from={from}
             to={to}
-            index={index}
-            focused={focusedConnectionId === connection.id}
+            index={index + particleIndex * 11}
+            focused={focused}
           />
-        );
+        ));
       })}
     </>
   );
@@ -59,8 +63,7 @@ function ConnectionParticle({
   focused,
 }: ConnectionParticleProps): JSX.Element {
   const meshRef = useRef<Mesh>(null);
-  const start = useMemo(() => new Vector3(...from.position), [from.position]);
-  const end = useMemo(() => new Vector3(...to.position), [to.position]);
+  const curve = useMemo(() => buildCablePath(from, to, connection.strength).curve, [connection.strength, from, to]);
   const color = statusColors[focused ? "approval" : connection.status];
 
   useFrame((state) => {
@@ -69,14 +72,13 @@ function ConnectionParticle({
     }
     const speed = focused ? 0.62 : 0.28;
     const t = (state.clock.elapsedTime * speed + index * 0.17) % 1;
-    const position = new Vector3().lerpVectors(start, end, t);
-    position.y += Math.sin(t * Math.PI) * (0.35 + connection.strength * 0.3);
+    const position = curve.getPointAt(t, new Vector3());
     meshRef.current.position.copy(position);
   });
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[focused ? 0.055 : 0.035, 12, 12]} />
+      <octahedronGeometry args={[focused ? 0.06 : 0.036, 0]} />
       <meshBasicMaterial color={color} transparent opacity={focused ? 0.96 : 0.72} />
     </mesh>
   );
