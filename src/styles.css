@@ -90,13 +90,13 @@ select:focus {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle at 50% 42%, rgba(15, 140, 255, 0.18), transparent 36%),
-    radial-gradient(circle at 12% 82%, rgba(194, 71, 255, 0.14), transparent 28%),
-    linear-gradient(135deg, #000308, #010812 48%, #000308);
+    radial-gradient(circle at 50% 45%, rgba(15, 140, 255, 0.12), transparent 42%),
+    radial-gradient(circle at 15% 85%, rgba(194, 71, 255, 0.1), transparent 32%),
+    #000206;
 }
 
 .app-sidebar {
@@ -104,27 +104,26 @@ select:focus {
   flex-direction: column;
   gap: 12px;
   align-items: stretch;
-  padding: 20px 10px;
-  border-right: 1px solid rgba(56, 213, 255, 0.22);
-  background:
-    linear-gradient(180deg, rgba(56, 213, 255, 0.08), transparent 45%),
-    rgba(0, 2, 6, 0.96);
-  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4);
+  padding: 16px 8px;
+  border-right: 1px solid rgba(56, 213, 255, 0.18);
+  background: rgba(0, 1, 3, 0.98);
+  box-shadow: 6px 0 32px rgba(0, 0, 0, 0.6);
+  z-index: 100;
 }
 
 .brand-mark {
   display: grid;
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 16px;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 12px;
   place-items: center;
-  border: 1px solid rgba(56, 213, 255, 0.75);
-  border-radius: 4px;
+  border: 1px solid rgba(56, 213, 255, 0.6);
+  border-radius: 2px;
   color: var(--cyan);
-  background: rgba(56, 213, 255, 0.1);
-  box-shadow: inset 0 0 22px rgba(56, 213, 255, 0.18), 0 0 32px rgba(56, 213, 255, 0.14);
+  background: rgba(56, 213, 255, 0.08);
+  box-shadow: inset 0 0 16px rgba(56, 213, 255, 0.12), 0 0 24px rgba(56, 213, 255, 0.1);
   font-weight: 900;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .app-sidebar button {
@@ -588,15 +587,16 @@ select:focus {
 .neural-breadcrumb,
 .approval-panel {
   position: absolute;
-  border: 1px solid rgba(56, 213, 255, 0.32);
-  border-radius: 4px;
+  border: 1px solid rgba(56, 213, 255, 0.28);
+  border-radius: 2px;
   background:
-    linear-gradient(135deg, rgba(56, 213, 255, 0.1), transparent 42%),
-    rgba(2, 10, 20, 0.64);
+    linear-gradient(135deg, rgba(56, 213, 255, 0.08), transparent 48%),
+    rgba(1, 4, 10, 0.58);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-    0 28px 90px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(24px) saturate(1.6);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 24px 70px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(28px) saturate(1.8);
+  pointer-events: auto;
 }
 
 .hud-corners::before,
@@ -642,19 +642,17 @@ select:focus {
 }
 
 .left-panel {
-  top: 22px;
-  left: 24px;
-  width: 340px;
-  padding: 16px;
+  top: 72px;
+  left: 20px;
+  width: 240px;
 }
 
 .right-panel {
-  top: 22px;
-  right: 24px;
-  width: 336px;
-  max-height: calc(100vh - 304px);
-  padding: 16px;
-  overflow: auto;
+  top: 72px;
+  right: 20px;
+  width: 280px;
+  max-height: calc(100vh - 380px);
+  overflow-y: auto;
 }
 
 .status-grid-compact,
@@ -810,10 +808,9 @@ select:focus {
 }
 
 .operator-console {
-  right: 388px;
-  bottom: 24px;
-  left: 24px;
-  max-width: 850px;
+  right: 20px;
+  bottom: 84px;
+  left: 20px;
   padding: 14px;
 }
 
@@ -902,12 +899,10 @@ select:focus {
 }
 
 .telemetry-deck {
-  right: 24px;
-  bottom: 24px;
-  width: 340px;
-  max-height: 236px;
-  padding: 13px;
-  overflow: hidden;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  height: 44px;
 }
 
 .telemetry-stream {
@@ -1506,213 +1501,80 @@ select:focus {
 
 .neural-space {
   background:
-    radial-gradient(circle at 50% 46%, rgba(15, 140, 255, 0.12), transparent 28%),
-    radial-gradient(circle at 36% 72%, rgba(194, 71, 255, 0.13), transparent 24%),
-    #01050a;
+    radial-gradient(circle at 50% 46%, rgba(15, 140, 255, 0.08), transparent 32%),
+    radial-gradient(circle at 36% 72%, rgba(194, 71, 255, 0.06), transparent 28%),
+    #000206;
 }
 
 .neural-space::before {
   background:
-    linear-gradient(rgba(56, 213, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 213, 255, 0.022) 1px, transparent 1px);
-  background-size: 44px 44px, 44px 44px;
-}
-
-.neural-topbar,
-.galaxy-breadcrumb,
-.hud-panel,
-.operator-console,
-.telemetry-deck,
-.approval-panel {
-  border-color: rgba(56, 213, 255, 0.28);
-  background:
-    linear-gradient(135deg, rgba(56, 213, 255, 0.08), transparent 34%),
-    rgba(3, 14, 26, 0.72);
+    linear-gradient(rgba(56, 213, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 213, 255, 0.015) 1px, transparent 1px);
+  background-size: 52px 42px;
 }
 
 .neural-topbar {
   position: absolute;
-  top: 18px;
+  top: 14px;
   left: 50%;
   z-index: 5;
-  display: grid;
-  grid-template-columns: auto repeat(6, auto);
-  gap: 12px;
+  display: flex;
+  gap: 16px;
   align-items: center;
-  max-width: min(1180px, calc(100vw - 64px));
-  min-height: 42px;
-  padding: 8px 14px;
+  justify-content: space-between;
+  width: calc(100% - 40px);
+  max-width: 1400px;
+  min-height: 38px;
+  padding: 0 16px;
   transform: translateX(-50%);
   pointer-events: auto;
-  border: 1px solid rgba(56, 213, 255, 0.24);
-  border-radius: 4px;
-  backdrop-filter: blur(18px);
-  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(56, 213, 255, 0.22);
+  border-radius: 2px;
+  background: rgba(1, 4, 10, 0.62);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.4);
 }
 
 .neural-topbar strong {
   color: var(--cyan);
-  font-size: 0.82rem;
-  white-space: nowrap;
+  font-size: 0.8rem;
 }
 
 .neural-topbar span {
-  color: #c8d8e6;
-  font-size: 0.68rem;
-  white-space: nowrap;
+  color: #a8b8c6;
+  font-size: 0.66rem;
 }
 
 .left-panel {
-  top: 82px;
-  left: 22px;
-  width: 318px;
-  padding: 14px;
+  top: 64px;
+  left: 20px;
+  width: 230px;
 }
 
 .right-panel {
-  top: 82px;
-  right: 22px;
-  width: 352px;
-  max-height: calc(100vh - 164px);
-  padding: 14px;
-}
-
-.selected-object-panel .hud-title {
-  font-size: 1.08rem;
-}
-
-.memory-mini-state {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 10px;
-  margin-top: 12px;
-  padding: 10px;
-  border: 1px solid rgba(194, 71, 255, 0.22);
-  background: rgba(23, 4, 36, 0.46);
-}
-
-.memory-mini-state span,
-.memory-used-line span {
-  color: var(--memory-purple);
-  font-size: 0.66rem;
-  text-transform: uppercase;
-}
-
-.memory-mini-state strong,
-.memory-used-line strong {
-  overflow-wrap: anywhere;
-  color: #f5dcff;
-  font-size: 0.76rem;
-}
-
-.galaxy-breadcrumb {
-  position: absolute;
-  top: 72px;
-  left: 50%;
-  z-index: 5;
-  display: flex;
-  max-width: min(620px, calc(100vw - 760px));
-  gap: 7px;
-  align-items: center;
-  padding: 7px;
-  transform: translateX(-50%);
-  pointer-events: auto;
-  border: 1px solid rgba(56, 213, 255, 0.22);
-  border-radius: 4px;
-  backdrop-filter: blur(16px);
-}
-
-.galaxy-breadcrumb .breadcrumb-path {
-  display: flex;
-  min-width: 0;
-  gap: 4px;
-  overflow: hidden;
-}
-
-.galaxy-breadcrumb .breadcrumb-path button {
-  min-height: 24px;
-  border: 0;
-  color: var(--muted);
-  background: transparent;
-  font-size: 0.62rem;
+  top: 64px;
+  right: 20px;
+  width: 270px;
+  max-height: calc(100vh - 400px);
 }
 
 .operator-console {
-  right: 386px;
-  bottom: 84px;
-  left: 360px;
-  max-width: none;
-  padding: 12px;
-}
-
-.context-console__bar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  color: var(--muted);
-  font-size: 0.74rem;
-}
-
-.context-console__bar strong {
-  color: var(--cyan);
-}
-
-.console-modes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-.console-modes button {
-  min-height: 28px;
-  padding: 0 9px;
-  color: var(--muted);
-  font-size: 0.68rem;
-}
-
-.console-modes button.active {
-  color: var(--white);
-  border-color: rgba(56, 213, 255, 0.72);
-  background: rgba(15, 140, 255, 0.18);
-}
-
-.context-usage {
-  padding: 7px 9px;
-  border: 1px solid rgba(56, 213, 255, 0.16);
-  font-size: 0.74rem;
-}
-
-.context-usage--used {
-  color: #dff7ff;
-  background: rgba(56, 213, 255, 0.08);
-}
-
-.context-usage--ignored {
-  color: #ffcf82;
-  border-color: rgba(255, 159, 47, 0.3);
-  background: rgba(255, 159, 47, 0.08);
-}
-
-.memory-used-line {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  padding-top: 8px;
-  border-top: 1px solid rgba(56, 213, 255, 0.1);
+  right: 20px;
+  bottom: 74px;
+  left: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .telemetry-deck.galaxy-footer {
-  right: auto;
+  right: 20px;
   bottom: 18px;
-  left: 50%;
-  width: min(980px, calc(100vw - 740px));
-  max-height: none;
-  padding: 8px 12px;
-  transform: translateX(-50%);
+  left: 20px;
+  width: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 42px;
+  transform: none;
 }
 
 .footer-status-grid {

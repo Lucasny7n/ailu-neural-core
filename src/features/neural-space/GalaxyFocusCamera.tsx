@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import type { GalaxyObject } from "./galaxyGraph";
 
@@ -8,25 +8,24 @@ interface GalaxyFocusCameraProps {
 }
 
 export function GalaxyFocusCamera({ focusedObject }: GalaxyFocusCameraProps): null {
-  const camera = useThree((state) => state.camera);
   const animationUntil = useRef(0);
   const targetPosition = useMemo(() => {
     const focus = new Vector3(...focusedObject.position);
-    const direction = focus.clone().length() > 0.1 ? focus.clone().normalize() : new Vector3(0.35, 0.24, 1).normalize();
-    const distance = focusedObject.kind === "core" ? 9.2 : focusedObject.kind === "star" ? 5.8 : 3.9;
-    return focus.add(direction.multiplyScalar(distance)).add(new Vector3(0, 0.7, 1.1));
+    const direction = focus.clone().length() > 0.1 ? focus.clone().normalize() : new Vector3(0.4, 0.3, 1).normalize();
+    const distance = focusedObject.kind === "core" ? 32 : focusedObject.kind === "star" ? 15 : 8;
+    return focus.add(direction.multiplyScalar(distance)).add(new Vector3(0, distance * 0.12, distance * 0.15));
   }, [focusedObject]);
 
   useEffect(() => {
-    animationUntil.current = performance.now() + 1250;
+    animationUntil.current = performance.now() + 1500;
   }, [focusedObject.id]);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (performance.now() > animationUntil.current) {
       return;
     }
-    camera.position.lerp(targetPosition, 0.075);
-    camera.lookAt(...focusedObject.position);
+    state.camera.position.lerp(targetPosition, 0.065);
+    state.camera.lookAt(...focusedObject.position);
   });
 
   return null;

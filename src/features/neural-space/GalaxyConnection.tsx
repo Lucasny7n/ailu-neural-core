@@ -17,7 +17,7 @@ export function GalaxyConnection({ connection, from, to, selected, dimmed, onSel
   const [hovered, setHovered] = useState(false);
   const active = selected || hovered || connection.active;
   const color = colorForGalaxyConnection(connection);
-  const opacity = dimmed ? 0.08 : active ? 0.88 : 0.32;
+  const opacity = dimmed ? 0.05 : active ? 1 : 0.45;
   const { curve, points } = useMemo(() => buildGalaxyCable(from, to, connection.strength), [from, to, connection.strength]);
 
   return (
@@ -33,15 +33,17 @@ export function GalaxyConnection({ connection, from, to, selected, dimmed, onSel
       }}
     >
       <mesh>
-        <tubeGeometry args={[curve, 72, active ? 0.052 : 0.032, 8, false]} />
-        <meshBasicMaterial color={color} transparent opacity={opacity * 0.28} />
+        <tubeGeometry args={[curve, 80, active ? 0.08 : 0.045, 8, false]} />
+        <meshBasicMaterial color={color} transparent opacity={opacity * 0.22} />
       </mesh>
+      
       <mesh>
-        <tubeGeometry args={[curve, 36, 0.16, 6, false]} />
+        <tubeGeometry args={[curve, 40, 0.25, 6, false]} />
         <meshBasicMaterial color={color} transparent opacity={0} depthWrite={false} />
       </mesh>
-      <Line points={points} color={color} lineWidth={active ? 3.2 : 1.5} transparent opacity={opacity} />
-      <Line points={points} color="#f5fbff" lineWidth={active ? 0.75 : 0.25} transparent opacity={active ? 0.34 : 0.1} />
+
+      <Line points={points} color={color} lineWidth={active ? 4.5 : 2.0} transparent opacity={opacity} />
+      <Line points={points} color="#fff" lineWidth={active ? 1.2 : 0.4} transparent opacity={active ? 0.45 : 0.15} />
     </group>
   );
 }

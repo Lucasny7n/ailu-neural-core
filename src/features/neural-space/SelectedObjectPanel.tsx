@@ -196,16 +196,20 @@ export function SelectedObjectPanel(): JSX.Element {
       ) : null}
 
       <div className="panel-actions">
-        <button
-          type="button"
-          onClick={() => {
-            const context = toActiveContext(selectedObject);
-            setActiveContext(context);
-            addTelemetry({ level: "success", message: `Contexto ativo: ${selectedObject.label}` });
-          }}
-        >
-          Usar como contexto
-        </button>
+        <div style={{ gridColumn: "1 / -1", display: "grid", gap: "8px", marginBottom: "4px" }}>
+          <button
+            type="button"
+            className="hud-button hud-button--primary"
+            onClick={() => {
+              const context = toActiveContext(selectedObject);
+              setActiveContext(context);
+              addTelemetry({ level: "success", message: `Contexto ativo: ${selectedObject.label}` });
+            }}
+          >
+            Usar como contexto
+          </button>
+        </div>
+        
         <button type="button" onClick={() => void handleOpen()}>
           Abrir
         </button>
@@ -237,7 +241,7 @@ export function SelectedObjectPanel(): JSX.Element {
           }}
           disabled={!children.length}
         >
-          {children.length ? "Explorar" : "Em breve"}
+          Explorar
         </button>
         <button type="button" onClick={() => setRoute("diagnostics")}>
           Ver logs
@@ -252,10 +256,10 @@ export function SelectedObjectPanel(): JSX.Element {
           Preparar ação
         </button>
         <button type="button" onClick={() => void handlePin()} disabled={!canUseMemoryNote || busyMemoryAction !== null}>
-          {canUseMemoryNote ? "Fixar memória" : "Em breve"}
+          {canUseMemoryNote ? "Fixar memória" : "Fixar"}
         </button>
         <button type="button" onClick={() => void handleForget()} disabled={!canUseMemoryNote || busyMemoryAction !== null}>
-          {canUseMemoryNote ? "Esquecer memória" : "Em breve"}
+          {canUseMemoryNote ? "Esquecer" : "Esquecer"}
         </button>
       </div>
       <button type="button" className="ghost-button hud-button" onClick={returnToCore}>

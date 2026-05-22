@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Line, Text } from "@react-three/drei";
+import { Line, Text, Billboard } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
 import { Vector3 } from "three";
@@ -16,6 +16,7 @@ interface GalaxyCoreProps {
 export function GalaxyCore({ object, selected, approvalActive, onSelect }: GalaxyCoreProps): JSX.Element {
   const groupRef = useRef<Group>(null);
   const innerRef = useRef<Group>(null);
+  const reactorRef = useRef<Group>(null);
   const [hovered, setHovered] = useState(false);
   const color = approvalActive ? "#ff9f2f" : colorForGalaxyObject(object);
   const active = selected || hovered || approvalActive;
@@ -28,13 +29,16 @@ export function GalaxyCore({ object, selected, approvalActive, onSelect }: Galax
       innerRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
       innerRef.current.rotation.y -= delta * (approvalActive ? 0.45 : 0.25);
     }
+    if (reactorRef.current) {
+      reactorRef.current.rotation.z += delta * 0.8;
+    }
   });
 
   return (
     <group
       ref={groupRef}
       position={object.position}
-      scale={1.25}
+      scale={1.5}
       onPointerOver={(event) => {
         event.stopPropagation();
         setHovered(true);
@@ -46,43 +50,73 @@ export function GalaxyCore({ object, selected, approvalActive, onSelect }: Galax
       }}
     >
       <SynapseMesh color={color} active={active} />
+      
       <group ref={innerRef}>
         <mesh>
-          <icosahedronGeometry args={[1.4, 3]} />
-          <meshStandardMaterial color="#020812" emissive={color} emissiveIntensity={active ? 1.5 : 1.1} roughness={0.1} metalness={0.7} />
+          <icosahedronGeometry args={[1.4, 4]} />
+          <meshStandardMaterial color="#000206" emissive={color} emissiveIntensity={active ? 2.2 : 1.4} roughness={0} metalness={1} />
         </mesh>
         <mesh>
           <sphereGeometry args={[1.9, 64, 48]} />
-          <meshBasicMaterial color={color} transparent opacity={active ? 0.18 : 0.1} wireframe />
+          <meshBasicMaterial color={color} transparent opacity={active ? 0.22 : 0.12} wireframe />
         </mesh>
       </group>
 
-      {[2.2, 2.8, 3.4].map((radius, index) => (
-        <group key={radius} rotation={[Math.PI / (index + 2.5), index * 0.6, Math.PI / 2.2]}>
+      <group ref={reactorRef}>
+        <TriangleShape color={color} active={active} size={0.65} />
+      </group>
+
+      {[2.2, 2.6, 3.2, 4.0].map((radius, index) => (
+        <group key={radius} rotation={[Math.PI / (index + 2.2), index * 0.7, Math.PI / 2.1]}>
           <mesh>
-            <torusGeometry args={[radius, index === 0 ? 0.025 : 0.015, 12, 180]} />
-            <meshBasicMaterial color={index === 2 && approvalActive ? "#ffcc66" : color} transparent opacity={active ? 0.85 - index * 0.2 : 0.45 - index * 0.12} />
+            <torusGeometry args={[radius, index === 0 ? 0.035 : 0.018, 16, 200]} />
+            <meshBasicMaterial color={index === 3 && approvalActive ? "#ffcc66" : color} transparent opacity={active ? 0.9 - index * 0.18 : 0.48 - index * 0.1} />
           </mesh>
-          {Array.from({ length: 32 }, (_, tick) => {
-            const angle = (tick / 32) * Math.PI * 2;
+          {index % 2 === 0 && Array.from({ length: 40 }, (_, tick) => {
+            const angle = (tick / 40) * Math.PI * 2;
             return (
               <mesh key={tick} position={[Math.cos(angle) * radius, Math.sin(angle) * radius, 0]} rotation={[0, 0, angle]}>
-                <boxGeometry args={[tick % 4 === 0 ? 0.22 : 0.09, 0.02, 0.02]} />
-                <meshBasicMaterial color={color} transparent opacity={0.65} />
+                <boxGeometry args={[tick % 5 === 0 ? 0.28 : 0.1, 0.025, 0.025]} />
+                <meshBasicMaterial color={color} transparent opacity={0.7} />
               </mesh>
             );
           })}
         </group>
       ))}
 
-      <pointLight color={color} intensity={active ? 12 : 8} distance={18} />
-      <pointLight color="#0f8cff" position={[1.5, 1.2, -0.6]} intensity={4} distance={12} />
-      <Text position={[0, -3.2, 0]} fontSize={0.25} color="#f5fbff" anchorX="center" anchorY="middle" maxWidth={4}>
-        Ailu Neural Core
-      </Text>
-      <Text position={[0, -3.6, 0]} fontSize={0.13} color={color} anchorX="center" anchorY="middle" maxWidth={3.5}>
-        {approvalActive ? "AGUARDANDO AUTORIZAÇÃO DO OPERADOR" : statusLabelForGalaxy(object).toUpperCase()}
-      </Text>
+      <pointLight color={color} intensity={active ? 22 : 12} distance={35} />
+      <pointLight color="#0f8cff" position={[2, 1.5, -1]} intensity={6} distance={20} />
+
+      <Billboard follow lockX={false} lockY={false} lockZ={false} position={[0, -5.2, 0]}>
+        <Text fontSize={0.38} color="#f5fbff" anchorX="center" anchorY="middle" maxWidth={6} outlineWidth={0.02} outlineColor="#000">
+          Ailu Neural Core
+        </Text>
+        <Text position={[0, -0.6, 0]} fontSize={0.18} color={color} anchorX="center" anchorY="middle" maxWidth={5} outlineWidth={0.01} outlineColor="#000">
+          {approvalActive ? "AGUARDANDO AUTORIZAÇÃO" : statusLabelForGalaxy(object).toUpperCase()}
+        </Text>
+      </Billboard>
+    </group>
+  );
+}
+
+function TriangleShape({ color, active, size }: { color: string; active: boolean; size: number }): JSX.Element {
+  const points = useMemo(() => {
+    const h = (Math.sqrt(3) / 2) * size;
+    return [
+      new Vector3(0, h * 0.67, 0),
+      new Vector3(-size / 2, -h * 0.33, 0),
+      new Vector3(size / 2, -h * 0.33, 0),
+      new Vector3(0, h * 0.67, 0),
+    ];
+  }, [size]);
+
+  return (
+    <group position={[0, 0, 1.6]}>
+      <Line points={points} color={color} lineWidth={3} transparent opacity={active ? 1 : 0.6} />
+      <mesh>
+        <circleGeometry args={[size * 0.28, 32]} />
+        <meshBasicMaterial color="#fff" transparent opacity={active ? 0.95 : 0.5} />
+      </mesh>
     </group>
   );
 }

@@ -36,6 +36,7 @@ function NeuralTopbar(): JSX.Element {
   const config = useNeuralStore((state) => state.config);
   const activePlan = useNeuralStore((state) => state.activePlan);
   const activeContext = useNeuralStore((state) => state.activeContext);
+  const returnToCore = useNeuralStore((state) => state.returnToCore);
   const memoryStats = useMemoryStore((state) => state.stats);
   const [providerStatus, setProviderStatus] = useState<AiProviderStatus | null>(null);
 
@@ -53,13 +54,19 @@ function NeuralTopbar(): JSX.Element {
 
   return (
     <header className="neural-topbar hud-corners">
-      <strong>Ailu Neural Core</strong>
-      <span>Núcleo: Operacional</span>
-      <span>IA: {providerStatus?.status === "ready" ? "Online" : "Offline"}</span>
-      <span>Memória: {memoryStats && memoryStats.notes > 0 ? "Ativa" : "Vazia"}</span>
-      <span>Aprovação: {activePlan ? "Aguardando" : "Protegida"}</span>
-      <span>Contexto: {activeContext?.title ?? "nenhum"}</span>
-      <span>Operador</span>
+      <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+        <strong>AILU NEURAL CORE</strong>
+        <span>IA: {providerStatus?.status === "ready" ? "Online" : "Offline"}</span>
+        <span>Memória: {memoryStats && memoryStats.notes > 0 ? "Ativa" : "Vazia"}</span>
+        <span>Aprovação: {activePlan ? "Pendente" : "Protegida"}</span>
+      </div>
+      
+      <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <span>Contexto: <strong>{activeContext?.title ?? "Geral"}</strong></span>
+        <button type="button" className="hud-button hud-button--micro" onClick={returnToCore}>
+          Ver galáxia inteira
+        </button>
+      </div>
     </header>
   );
 }

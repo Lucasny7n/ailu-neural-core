@@ -96,17 +96,17 @@ export function NeuralGalaxyScene(): JSX.Element {
     <Canvas
       className="neural-canvas"
       dpr={dpr}
-      camera={{ position: [0, 3.5, 12.5], fov: 62, near: 0.1, far: 150 }}
+      camera={{ position: [0, 16, 48], fov: 58, near: 0.1, far: 900 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       onPointerMissed={returnToCore}
     >
-      <color attach="background" args={["#000308"]} />
-      <fog attach="fog" args={["#000308", 15, 45]} />
-      <ambientLight intensity={0.35} />
-      <directionalLight color="#38d5ff" position={[5, 10, 5]} intensity={1.5} />
-      <pointLight color="#0f8cff" position={[-8, -5, -8]} intensity={3.5} distance={35} />
-      <pointLight color="#c247ff" position={[-10, -6, -4]} intensity={2.2} distance={28} />
-      <Stars radius={60} depth={35} count={starCount * 1.5} factor={2.2} saturation={0.4} fade speed={0.28} />
+      <color attach="background" args={["#000206"]} />
+      <fog attach="fog" args={["#000206", 45, 600]} />
+      <ambientLight intensity={0.4} />
+      <directionalLight color="#38d5ff" position={[10, 20, 10]} intensity={1.8} />
+      <pointLight color="#0f8cff" position={[-15, -10, -15]} intensity={4.5} distance={120} />
+      <pointLight color="#c247ff" position={[-20, -12, -8]} intensity={2.8} distance={100} />
+      <Stars radius={300} depth={80} count={starCount * 2} factor={3.5} saturation={0.5} fade speed={0.4} />
 
       {config.showOrbits
         ? allObjects.map((object) => {
@@ -176,11 +176,13 @@ export function NeuralGalaxyScene(): JSX.Element {
         makeDefault
         target={target}
         enableDamping
-        dampingFactor={0.08}
-        minDistance={2.6}
-        maxDistance={18}
-        rotateSpeed={0.58}
-        zoomSpeed={0.7}
+        dampingFactor={0.06}
+        minDistance={2.5}
+        maxDistance={95}
+        rotateSpeed={0.55}
+        zoomSpeed={0.85}
+        enablePan
+        panSpeed={0.6}
       />
     </Canvas>
   );
