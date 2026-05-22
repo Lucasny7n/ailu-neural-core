@@ -19,6 +19,7 @@ const kinds: Array<MemoryNoteKind | "all"> = [
   "decision",
   "action",
   "rule",
+  "dream",
   "import",
 ];
 
@@ -82,6 +83,7 @@ function kindLabel(kind: MemoryNoteKind | "all"): string {
     decision: "decisão",
     action: "ação",
     rule: "regra",
+    dream: "sonho",
     import: "arquivo",
   };
   return labels[kind];

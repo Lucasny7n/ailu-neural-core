@@ -6,6 +6,7 @@ export type MemoryNoteKind =
   | "decision"
   | "action"
   | "rule"
+  | "dream"
   | "import";
 
 export interface MemoryConfig {

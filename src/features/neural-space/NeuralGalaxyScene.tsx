@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Component, useEffect, useMemo, type ReactNode } from "react";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -22,11 +22,8 @@ import {
 } from "./galaxyGraph";
 import { emitNeuralEvent } from "./neuralEvents";
 
-export type GalaxyViewMode = "cockpit" | "exploration";
-
 export function NeuralGalaxyScene(): JSX.Element {
-  const [viewMode, setViewMode] = useState<GalaxyViewMode>("cockpit");
-  
+  const viewMode = useNeuralStore((state) => state.viewMode);
   const selectedGalaxyObjectId = useNeuralStore((state) => state.selectedGalaxyObjectId);
   const selectedConnectionId = useNeuralStore((state) => state.selectedConnectionId);
   const activePlan = useNeuralStore((state) => state.activePlan);
@@ -68,7 +65,6 @@ export function NeuralGalaxyScene(): JSX.Element {
         : allConnections.filter((connection) => connection.active || connection.strength >= 0.62 || activeIds.has(connection.fromId) || activeIds.has(connection.toId)),
     [activeIds, allConnections, config.showSecondaryConnections, viewMode],
   );
-  const target = useMemo(() => new Vector3(...selectedObject.position), [selectedObject.position]);
   const dpr: [number, number] = config.galaxyQuality === "ultra" ? [1.25, 1.8] : config.galaxyQuality === "low" ? [0.8, 1.1] : [1, 1.5];
   const starCount = config.galaxyQuality === "ultra" ? 1500 : config.galaxyQuality === "low" ? 650 : 1050;
   const particleLimit = config.particleDensity === "high" ? config.maxParticles : config.particleDensity === "low" ? Math.floor(config.maxParticles * 0.42) : Math.floor(config.maxParticles * 0.7);
@@ -103,22 +99,24 @@ export function NeuralGalaxyScene(): JSX.Element {
   
   // Criar objetos com posições ajustadas para o modo atual
   const modeAdjustedObjects = useMemo(() => {
-    return allObjects.map(obj => ({
+    return allObjects.map((obj) => ({
       ...obj,
       position: getObjectPosition(obj),
-      scale: getObjectScale(obj),
+      displayScale: getObjectScale(obj),
     }));
   }, [allObjects, getObjectPosition, getObjectScale]);
   
   const modeAdjustedObjectMap = useMemo(() => {
     return new Map(modeAdjustedObjects.map((object) => [object.id, object]));
   }, [modeAdjustedObjects]);
+  const selectedAdjustedObject = modeAdjustedObjectMap.get(selectedObject.id) ?? selectedObject;
+  const target = useMemo(() => new Vector3(...selectedAdjustedObject.position), [selectedAdjustedObject.position]);
 
   if (!hasWebGl()) {
     return (
       <div className="webgl-fallback">
-        <strong>WebGL indisponível</strong>
-        <span>A galáxia neural 3D precisa de aceleração gráfica ativa.</span>
+        <strong>Falha ao carregar Galáxia Neural</strong>
+        <span>Verifique WebGL ou veja os logs.</span>
       </div>
     );
   }
@@ -138,21 +136,23 @@ export function NeuralGalaxyScene(): JSX.Element {
   }
 
   return (
-    <div className="neural-space">
-      <Canvas
-        className="neural-canvas"
-        dpr={dpr}
-        camera={currentCamera}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        onPointerMissed={returnToCore}
-      >
-        <color attach="background" args={["#000206"]} />
-        <fog attach="fog" args={["#000206", viewMode === "cockpit" ? 35 : 45, viewMode === "cockpit" ? 500 : 600]} />
-        <ambientLight intensity={0.4} />
-        <directionalLight color="#38d5ff" position={[10, 20, 10]} intensity={1.8} />
-        <pointLight color="#0f8cff" position={[-15, -10, -15]} intensity={4.5} distance={120} />
-        <pointLight color="#c247ff" position={[-20, -12, -8]} intensity={2.8} distance={100} />
-        <Stars radius={viewMode === "cockpit" ? 200 : 300} depth={80} count={starCount * 2} factor={3.5} saturation={0.5} fade speed={0.4} />
+    <CanvasErrorBoundary>
+      <div className="neural-galaxy-stage">
+        <Canvas
+          className="neural-canvas"
+          dpr={dpr}
+          camera={currentCamera}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          onPointerMissed={returnToCore}
+        >
+          <color attach="background" args={["#000206"]} />
+          <fog attach="fog" args={["#000206", viewMode === "cockpit" ? 35 : 45, viewMode === "cockpit" ? 500 : 600]} />
+          <ambientLight intensity={0.46} />
+          <directionalLight color="#38d5ff" position={[10, 20, 10]} intensity={2.1} />
+          <pointLight color="#38d5ff" position={[0, 0, 8]} intensity={viewMode === "cockpit" ? 10 : 5} distance={55} />
+          <pointLight color="#0f8cff" position={[-15, -10, -15]} intensity={4.5} distance={120} />
+          <pointLight color="#c247ff" position={[-20, -12, -8]} intensity={2.8} distance={100} />
+          <Stars radius={viewMode === "cockpit" ? 200 : 300} depth={80} count={starCount * 2} factor={3.5} saturation={0.5} fade speed={0.4} />
 
         {config.showOrbits
           ? modeAdjustedObjects.map((object) => {
@@ -217,39 +217,22 @@ export function NeuralGalaxyScene(): JSX.Element {
           );
         })}
 
-        <GalaxyFocusCamera focusedObject={selectedObject} />
-        <OrbitControls
-          makeDefault
-          target={target}
-          enableDamping
-          dampingFactor={0.06}
-          minDistance={viewMode === "cockpit" ? 2.5 : 4}
-          maxDistance={viewMode === "cockpit" ? 55 : 140}
-          rotateSpeed={0.55}
-          zoomSpeed={0.85}
-          enablePan
-          panSpeed={0.6}
-        />
-      </Canvas>
-      
-      {/* HUD de controle de modo */}
-      <div className="hud-layer">
-        <div className="view-mode-toggle hud-panel hud-corners" style={{ top: '72px', left: '92px', padding: '10px 14px' }}>
-          <button 
-            className={`hud-button ${viewMode === "cockpit" ? "active" : ""}`}
-            onClick={() => { setViewMode("cockpit"); addTelemetry({ level: "info", message: "Modo Cockpit ativado" }); }}
-          >
-            Cockpit
-          </button>
-          <button 
-            className={`hud-button ${viewMode === "exploration" ? "active" : ""}`}
-            onClick={() => { setViewMode("exploration"); addTelemetry({ level: "info", message: "Modo Exploração ativado" }); }}
-          >
-            Galáxia inteira
-          </button>
-        </div>
+          <GalaxyFocusCamera focusedObject={selectedAdjustedObject} />
+          <OrbitControls
+            makeDefault
+            target={target}
+            enableDamping
+            dampingFactor={0.06}
+            minDistance={viewMode === "cockpit" ? 2.5 : 4}
+            maxDistance={viewMode === "cockpit" ? 55 : 140}
+            rotateSpeed={0.55}
+            zoomSpeed={0.85}
+            enablePan={viewMode === "exploration"}
+            panSpeed={0.6}
+          />
+        </Canvas>
       </div>
-    </div>
+    </CanvasErrorBoundary>
   );
 }
 
@@ -295,6 +278,29 @@ function buildActiveObjectSet(
 }
 
 function hasWebGl(): boolean {
+  if (typeof document === "undefined") {
+    return false;
+  }
   const canvas = document.createElement("canvas");
   return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+}
+
+class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true };
+  }
+
+  render(): ReactNode {
+    if (this.state.failed) {
+      return (
+        <div className="webgl-fallback">
+          <strong>Falha ao carregar Galáxia Neural</strong>
+          <span>Verifique WebGL ou veja os logs.</span>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }

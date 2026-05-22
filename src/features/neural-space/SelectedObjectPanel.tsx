@@ -86,6 +86,9 @@ export function SelectedObjectPanel(): JSX.Element {
   }
 
   const children = [...getGalaxyChildren(selectedObject.id), ...dynamicMemory.objects.filter((object) => object.parentId === selectedObject.id)];
+  const objectConnections = [...connectionMap.values()]
+    .filter((connection) => connection.fromId === selectedObject.id || connection.toId === selectedObject.id)
+    .slice(0, 8);
   const related = [
     ...getRelatedGalaxyObjects(selectedObject.id),
     ...selectedObject.relatedIds.flatMap((id) => {
@@ -169,6 +172,27 @@ export function SelectedObjectPanel(): JSX.Element {
                 {child.label}
               </button>
             ))}
+          </div>
+        </div>
+      ) : null}
+
+      {objectConnections.length ? (
+        <div className="node-relations">
+          <span>Ligações</span>
+          <div>
+            {objectConnections.map((connection) => {
+              const context = contextFromConnection(connection, objectMap);
+              return (
+                <button
+                  key={connection.id}
+                  type="button"
+                  className="hud-button hud-button--micro"
+                  onClick={() => selectGalaxyConnection(connection.id, context)}
+                >
+                  {context.title}
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : null}

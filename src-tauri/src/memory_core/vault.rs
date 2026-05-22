@@ -51,6 +51,7 @@ pub fn init_vault(config: &MemoryConfig) -> MemoryResult<PathBuf> {
         "notes/decisions",
         "notes/actions",
         "notes/rules",
+        "notes/dreams",
         "notes/imports",
         "attachments",
         ".ailu",
@@ -162,6 +163,7 @@ pub fn infer_kind_from_path(path: &str) -> MemoryNoteKind {
         MemoryNoteKind::Decision,
         MemoryNoteKind::Action,
         MemoryNoteKind::Rule,
+        MemoryNoteKind::Dream,
         MemoryNoteKind::Import,
     ] {
         let marker = format!("/{}{}", kind.folder(), "/");

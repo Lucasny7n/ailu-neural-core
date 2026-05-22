@@ -51,6 +51,7 @@ export interface GalaxyObject {
   
   // importância visual
   visualWeight?: number;
+  displayScale?: number;
   
   orbitRadius?: number;
   orbitSpeed?: number;
@@ -139,7 +140,7 @@ export const galaxyObjects: GalaxyObject[] = [
     description: "Centro da galáxia neural. Coordena conversa, contexto ativo, memória e planos protegidos por aprovação.",
     position: [0, 0, 0],
     cockpitPosition: [0, 0, 0],
-    cockpitScale: 1.8,
+    cockpitScale: 1.45,
     visualWeight: 10,
     status: "online",
     colorRole: "core",
@@ -377,17 +378,63 @@ export const galaxyObjects: GalaxyObject[] = [
   object({ id: "pipewire", kind: "planet", domain: "audio", label: "PipeWire", description: "Servidor de áudio e vídeo da sessão.", position: [-0.2, -8.2, 5.8], orbitRadius: 2.7, orbitSpeed: 0.09, parentId: "audio", status: "idle", colorRole: "audio", relatedIds: ["wireplumber"] }),
   object({ id: "plans", kind: "action", domain: "actions", label: "Planos", description: "Planos gerados pela IA antes da aprovação.", position: [-2.2, -7.5, -3.8], orbitRadius: 2.5, orbitSpeed: 0.08, parentId: "actions", status: "approval", colorRole: "action", relatedIds: ["approvals"] }),
   object({ id: "approvals", kind: "action", domain: "actions", label: "Aprovações", description: "Camada obrigatória antes de qualquer execução.", position: [1.8, -7.8, -4.2], orbitRadius: 3.2, orbitSpeed: 0.07, parentId: "actions", status: "approval", colorRole: "action", relatedIds: ["approval-layer", "executions"] }),
+  object({ id: "memory-conversations", kind: "planet", domain: "memory", label: "Conversas", description: "Conversas capturadas quando o operador salva ou quando o fluxo registra contexto.", position: [-4.8, 1.0, -6.1], orbitRadius: 3.1, orbitSpeed: 0.07, parentId: "memory", status: "idle", colorRole: "memory", relatedIds: ["ai-recovered-context"] }),
+  object({ id: "memory-dreams", kind: "planet", domain: "memory", label: "Sonhos", description: "Sugestões de curadoria geradas pelo Dreaming Engine mínimo.", position: [-5.6, 4.1, -3.6], orbitRadius: 3.4, orbitSpeed: 0.06, parentId: "memory", status: "idle", colorRole: "memory", relatedIds: ["memory-decisions", "memory-audit"] }),
+  object({ id: "memory-rules", kind: "planet", domain: "memory", label: "Regras", description: "Regras persistentes recuperadas antes de responder ou planejar.", position: [-3.3, 2.2, -6.0], orbitRadius: 2.9, orbitSpeed: 0.08, parentId: "memory", status: "success", colorRole: "memory", relatedIds: ["approval-layer"] }),
+  object({ id: "memory-audit", kind: "planet", domain: "memory", label: "Auditoria", description: "Trilha de registros jsonl e capturas operacionais.", position: [-6.9, 3.3, -2.7], orbitRadius: 3.7, orbitSpeed: 0.055, parentId: "memory", status: "idle", colorRole: "memory", relatedIds: ["memory-dreams", "executions"] }),
+  object({ id: "memory-saved-actions", kind: "action", domain: "memory", label: "Ações salvas", description: "Planos e execuções registradas em memória.", position: [-3.9, 4.8, -4.7], orbitRadius: 3.2, orbitSpeed: 0.06, parentId: "memory", status: "approval", colorRole: "action", relatedIds: ["actions"] }),
+  object({ id: "memory-projects", kind: "planet", domain: "memory", label: "Projetos", description: "Contexto de projeto persistido no vault.", position: [-7.0, 1.7, -3.6], orbitRadius: 3.0, orbitSpeed: 0.07, parentId: "memory", status: "idle", colorRole: "memory", relatedIds: ["memory-files"] }),
+  object({ id: "ai-recovered-context", kind: "planet", domain: "ai", label: "Contexto", description: "Contexto relevante recuperado do Memory Core antes de responder.", position: [4.2, -0.4, -3.0], orbitRadius: 2.6, orbitSpeed: 0.09, parentId: "ai", status: "active", colorRole: "core", relatedIds: ["memory", "ai-active-prompt"] }),
+  object({ id: "ai-active-prompt", kind: "planet", domain: "ai", label: "Prompt ativo", description: "Prompt montado com intenção, contexto ativo e memória recuperada.", position: [3.6, -3.8, -2.6], orbitRadius: 2.9, orbitSpeed: 0.08, parentId: "ai", status: "idle", colorRole: "core", relatedIds: ["ai-recovered-context"] }),
+  object({ id: "provider", kind: "planet", domain: "ai", label: "Provider", description: "Camada de provedores reais, sem marcar pronto sem teste.", position: [7.1, -2.4, -1.8], orbitRadius: 3.3, orbitSpeed: 0.07, parentId: "ai", status: "warning", colorRole: "core", relatedIds: ["ollama", "ai-current-model"] }),
+  object({ id: "model", kind: "planet", domain: "ai", label: "Modelo", description: "Modelo configurado para responder ou planejar.", position: [5.0, -4.2, -1.2], orbitRadius: 3.0, orbitSpeed: 0.08, parentId: "ai", status: "idle", colorRole: "core", relatedIds: ["provider", "ai-current-model"] }),
+  object({ id: "packages", kind: "system-component", domain: "system", label: "Pacotes", description: "Pacotes instalados e verificações seguras.", position: [8.1, 2.2, 4.8], orbitRadius: 3.2, orbitSpeed: 0.07, parentId: "system", status: "idle", colorRole: "system", relatedIds: ["storage"] }),
+  object({ id: "services", kind: "system-component", domain: "system", label: "Serviços", description: "Unidades systemd e estado operacional.", position: [5.7, 0.8, 5.4], orbitRadius: 2.7, orbitSpeed: 0.08, parentId: "system", status: "idle", colorRole: "system", relatedIds: ["systemd"] }),
+  object({ id: "logs", kind: "system-component", domain: "logs", label: "Logs", description: "Logs do sistema para diagnóstico seguro.", position: [8.6, 3.2, 3.0], orbitRadius: 3.4, orbitSpeed: 0.06, parentId: "system", status: "idle", colorRole: "system", relatedIds: ["kernel", "systemd"] }),
+  object({ id: "drivers", kind: "hardware-component", domain: "hardware", label: "Drivers", description: "Drivers, módulos e stack gráfico.", position: [6.6, 5.4, -3.2], orbitRadius: 2.8, orbitSpeed: 0.07, parentId: "hardware", status: "idle", colorRole: "hardware", relatedIds: ["gpu", "kernel"] }),
+  object({ id: "monitors", kind: "planet", domain: "interface", label: "Monitores", description: "Monitores conectados e geometria visual.", position: [-8.2, -1.6, 2.4], orbitRadius: 3.0, orbitSpeed: 0.08, parentId: "interface", status: "idle", colorRole: "system", relatedIds: ["hyprland"] }),
+  object({ id: "workspaces", kind: "planet", domain: "interface", label: "Workspaces", description: "Áreas de trabalho e organização da sessão.", position: [-5.3, -3.6, 3.4], orbitRadius: 2.8, orbitSpeed: 0.08, parentId: "interface", status: "idle", colorRole: "system", relatedIds: ["hyprland"] }),
+  object({ id: "windows", kind: "planet", domain: "interface", label: "Janelas", description: "Janelas abertas e foco da sessão.", position: [-7.1, -2.8, 4.8], orbitRadius: 3.1, orbitSpeed: 0.07, parentId: "interface", status: "idle", colorRole: "system", relatedIds: ["workspaces"] }),
+  object({ id: "disk", kind: "hardware-component", domain: "storage", label: "Disco", description: "Uso de disco e diretórios locais.", position: [8.4, -3.6, 2.0], orbitRadius: 2.6, orbitSpeed: 0.08, parentId: "storage", status: "idle", colorRole: "hardware", relatedIds: ["memory-files"] }),
+  object({ id: "zram", kind: "hardware-component", domain: "ram", label: "ZRAM", description: "Swap comprimido e pressão de memória.", position: [6.8, -4.9, -3.2], orbitRadius: 2.7, orbitSpeed: 0.08, parentId: "ram-zram", status: "idle", colorRole: "hardware", relatedIds: ["memory-pressure"] }),
+  object({ id: "memory-pressure", kind: "hardware-component", domain: "ram", label: "Pressão de Memória", description: "Indicadores de pressão, RAM e swap.", position: [4.2, -5.5, -4.2], orbitRadius: 3.0, orbitSpeed: 0.07, parentId: "ram-zram", status: "idle", colorRole: "hardware", relatedIds: ["zram"] }),
+  object({ id: "bluetooth", kind: "planet", domain: "connectivity", label: "Bluetooth", description: "Bluetooth e dispositivos pareados.", position: [-9.0, -4.7, 4.7], orbitRadius: 2.9, orbitSpeed: 0.07, parentId: "connectivity", status: "idle", colorRole: "connectivity", relatedIds: ["network"] }),
+  object({ id: "dns", kind: "planet", domain: "connectivity", label: "DNS", description: "Resolução de nomes e rotas de rede.", position: [-7.4, -6.7, 2.5], orbitRadius: 3.0, orbitSpeed: 0.08, parentId: "connectivity", status: "idle", colorRole: "connectivity", relatedIds: ["network"] }),
+  object({ id: "wireplumber", kind: "planet", domain: "audio", label: "WirePlumber", description: "Gerência de sessão do PipeWire.", position: [0.8, -8.8, 4.7], orbitRadius: 2.8, orbitSpeed: 0.08, parentId: "audio", status: "idle", colorRole: "audio", relatedIds: ["pipewire"] }),
+  object({ id: "audio-devices", kind: "planet", domain: "audio", label: "Dispositivos", description: "Entradas, saídas e roteamento de áudio.", position: [-2.4, -8.3, 5.2], orbitRadius: 3.0, orbitSpeed: 0.07, parentId: "audio", status: "idle", colorRole: "audio", relatedIds: ["pipewire"] }),
+  object({ id: "approval-layer", kind: "action", domain: "actions", label: "Approval Layer", description: "Nenhuma ação real executa sem autorização explícita.", position: [3.2, -7.0, -4.8], orbitRadius: 3.5, orbitSpeed: 0.06, parentId: "actions", status: "approval", colorRole: "action", relatedIds: ["memory-rules"] }),
+  object({ id: "executions", kind: "action", domain: "actions", label: "Execuções", description: "Histórico de execuções aprovadas e logs.", position: [0.2, -8.7, -3.3], orbitRadius: 3.1, orbitSpeed: 0.07, parentId: "actions", status: "idle", colorRole: "action", relatedIds: ["approval-layer", "memory-audit"] }),
+  object({ id: "action-history", kind: "action", domain: "actions", label: "Histórico", description: "Registro local de ações planejadas, canceladas e executadas.", position: [-1.5, -8.1, -2.1], orbitRadius: 2.8, orbitSpeed: 0.08, parentId: "actions", status: "idle", colorRole: "action", relatedIds: ["executions"] }),
 ];
 
 export const galaxyConnections: GalaxyConnection[] = [
   ...["memory", "ai", "system", "interface", "hardware", "cpu", "gpu", "ram-zram", "storage", "connectivity", "audio", "actions"].map(
     (id) => ({ id: `core-${id}`, fromId: "core", toId: id, relation: "órbita principal", strength: 0.95, colorRole: id === "actions" ? "action" : id === "memory" ? "memory" : "core" }) satisfies GalaxyConnection,
   ),
+  { id: "memory-to-files", fromId: "memory", toId: "memory-files", relation: "arquivos indexados", strength: 0.78, colorRole: "memory", active: true },
+  { id: "memory-to-decisions", fromId: "memory", toId: "memory-decisions", relation: "decisões persistidas", strength: 0.86, colorRole: "memory", active: true },
+  { id: "memory-to-conversations", fromId: "memory", toId: "memory-conversations", relation: "conversas salvas", strength: 0.72, colorRole: "memory" },
+  { id: "memory-to-dreams", fromId: "memory", toId: "memory-dreams", relation: "curadoria onírica", strength: 0.62, colorRole: "memory" },
+  { id: "memory-to-audit", fromId: "memory", toId: "memory-audit", relation: "auditoria jsonl", strength: 0.7, colorRole: "memory" },
   { id: "memory-ai-context", fromId: "memory", toId: "ai-recovered-context", relation: "contexto recuperado", strength: 0.92, colorRole: "memory", active: true },
   { id: "ai-prompt-context", fromId: "ai-active-prompt", toId: "ai-recovered-context", relation: "injeta contexto", strength: 0.82, colorRole: "core", active: true },
+  { id: "link-ai-provider", fromId: "ai", toId: "provider", relation: "seleciona provider", strength: 0.78, colorRole: "core" },
+  { id: "link-ai-model", fromId: "ai", toId: "model", relation: "usa modelo", strength: 0.76, colorRole: "core" },
+  { id: "ai-memory", fromId: "ai", toId: "memory", relation: "consulta memória", strength: 0.9, colorRole: "memory", active: true },
   { id: "memory-actions", fromId: "memory-saved-actions", toId: "actions", relation: "histórico operacional", strength: 0.78, colorRole: "action" },
   { id: "approval-rules", fromId: "approval-layer", toId: "memory-rules", relation: "regras de segurança", strength: 0.86, colorRole: "action" },
-  { id: "system-logs", fromId: "system", toId: "logs", relation: "telemetria", strength: 0.72, colorRole: "system" },
+  { id: "hardware-cpu", fromId: "hardware", toId: "cpu", relation: "telemetria de CPU", strength: 0.72, colorRole: "hardware" },
+  { id: "hardware-gpu", fromId: "hardware", toId: "gpu", relation: "telemetria de GPU", strength: 0.74, colorRole: "hardware" },
+  { id: "hardware-ram", fromId: "hardware", toId: "ram-zram", relation: "pressão de memória", strength: 0.74, colorRole: "hardware" },
+  { id: "hardware-storage", fromId: "hardware", toId: "storage", relation: "uso de disco", strength: 0.68, colorRole: "hardware" },
+  { id: "link-actions-approval-layer", fromId: "actions", toId: "approval-layer", relation: "bloqueio obrigatório", strength: 0.92, colorRole: "action", active: true },
+  { id: "actions-system", fromId: "actions", toId: "system", relation: "plano para sistema", strength: 0.66, colorRole: "action" },
+  { id: "link-interface-workspaces", fromId: "interface", toId: "workspaces", relation: "organiza sessão", strength: 0.68, colorRole: "system" },
+  { id: "link-connectivity-bluetooth", fromId: "connectivity", toId: "bluetooth", relation: "dispositivos", strength: 0.62, colorRole: "connectivity" },
+  { id: "link-connectivity-dns", fromId: "connectivity", toId: "dns", relation: "resolução", strength: 0.7, colorRole: "connectivity" },
+  { id: "link-storage-disk", fromId: "storage", toId: "disk", relation: "volume local", strength: 0.72, colorRole: "hardware" },
+  { id: "audio-devices-link", fromId: "audio", toId: "audio-devices", relation: "roteamento de áudio", strength: 0.66, colorRole: "audio" },
+  { id: "link-system-logs", fromId: "system", toId: "logs", relation: "telemetria", strength: 0.72, colorRole: "system" },
   { id: "kernel-drivers", fromId: "kernel", toId: "drivers", relation: "módulos", strength: 0.68, colorRole: "hardware" },
   { id: "gpu-hyprland", fromId: "gpu", toId: "hyprland", relation: "renderização", strength: 0.82, colorRole: "hardware" },
   { id: "storage-memory", fromId: "storage", toId: "memory-files", relation: "arquivos importados", strength: 0.74, colorRole: "memory" },
@@ -605,6 +652,9 @@ function memoryParentForKind(kind: GalaxyObjectKind, rawKind: string): string {
   if (rawKind === "conversation") {
     return "memory-conversations";
   }
+  if (rawKind === "dream") {
+    return "memory-dreams";
+  }
   if (rawKind === "rule") {
     return "memory-rules";
   }
@@ -626,6 +676,7 @@ function memoryKindLabel(kind: string): string {
     decision: "Decisão",
     action: "Ação",
     rule: "Regra",
+    dream: "Sonho",
     import: "Arquivo",
   };
   return labels[kind] ?? "Memória";

@@ -27,6 +27,7 @@ export function ContextAwareCommandConsole(): JSX.Element {
   const handledQueueId = useRef<string | undefined>(undefined);
   const config = useNeuralStore((state) => state.config);
   const activeContext = useNeuralStore((state) => state.activeContext);
+  const selectedConnectionId = useNeuralStore((state) => state.selectedConnectionId);
   const queuedConsoleCommand = useNeuralStore((state) => state.queuedConsoleCommand);
   const operatorExchange = useNeuralStore((state) => state.operatorExchange);
   const setActivePlan = useNeuralStore((state) => state.setActivePlan);
@@ -44,7 +45,7 @@ export function ContextAwareCommandConsole(): JSX.Element {
       setRoute("neural");
       selectGalaxyObject(targetNodeId);
       setNodeStatus(targetNodeId, "running");
-      addTelemetry({ level: "info", message: `Diagnóstico seguro iniciado: ${diagnosticKey}` });
+      addTelemetry({ level: "info", message: `Leitura segura iniciada: ${diagnosticKey}` });
       try {
         const diagnostic = await runSafeDiagnostic(diagnosticKey);
         addDiagnostic(diagnostic);
@@ -282,6 +283,79 @@ export function ContextAwareCommandConsole(): JSX.Element {
     }
   }
 
+  async function handleDreamNow(): Promise<void> {
+    if (busy) {
+      return;
+    }
+    setBusy(true);
+    try {
+      const memoryState = useMemoryStore.getState();
+      const dreamContext = await memoryState.buildContext(
+        `sonhar agora ${activeContext?.title ?? ""} ${activeContext?.description ?? ""}`,
+        "dream",
+        activeContext?.nodeId ? [activeContext.nodeId] : undefined,
+      );
+      if (!dreamContext.notes.length && !dreamContext.chunks.length) {
+        const intent = classifyOperatorIntent("sonhar agora");
+        setOperatorExchange({
+          userMessage: "Sonhar agora",
+          intent: { ...intent, responseMode: "answer", requiresApproval: false, shouldCreateActionPlan: false },
+          response: {
+            title: "Memória insuficiente",
+            body: "Não há memórias suficientes para sonhar. Salve decisões ou importe arquivos para alimentar o núcleo.",
+            suggestions: [{ id: "open-memory-core", label: "Abrir Memória", kind: "navigate", nodeId: "memory" }],
+          },
+          memoryContext: dreamContext,
+          activeContext,
+          activeContextUsed: Boolean(activeContext),
+          createdAt: new Date().toISOString(),
+        });
+        addTelemetry({ level: "warn", message: "Dreaming Engine sem memória suficiente." });
+        return;
+      }
+
+      const sourceList = dreamContext.sourceLabels.slice(0, 6).join(", ") || "memória local recuperada";
+      const body = [
+        "## Sonho Neural",
+        "",
+        `Contexto focado: ${activeContext?.title ?? "Núcleo geral"}`,
+        `Fontes: ${sourceList}`,
+        "",
+        "## Sugestão de relação",
+        "",
+        `Relacionar ${activeContext?.title ?? "o núcleo"} com as memórias recentes para revisar decisões, regras e ações salvas antes do próximo plano.`,
+        "",
+        "## Curadoria sugerida",
+        "",
+        "- revisar memórias sem tags",
+        "- transformar decisões recorrentes em regras",
+        "- manter ações reais atrás do Approval Layer",
+      ].join("\n");
+      const detail = await memoryState.captureDream(body, `Sonho Neural - ${activeContext?.title ?? "Núcleo"}`);
+      await memoryState.getGraph();
+      const intent = classifyOperatorIntent("sonhar agora");
+      setOperatorExchange({
+        userMessage: "Sonhar agora",
+        intent: { ...intent, responseMode: "answer", requiresApproval: false, shouldCreateActionPlan: false },
+        response: {
+          title: "Sonho salvo",
+          body: `Dreaming Engine criou ${detail.note.path}. Nenhum comando real foi executado.`,
+          suggestions: [{ id: "open-memory-core", label: "Abrir Memória", kind: "navigate", nodeId: "memory" }],
+        },
+        memoryContext: dreamContext,
+        activeContext,
+        activeContextUsed: Boolean(activeContext),
+        createdAt: new Date().toISOString(),
+      });
+      addTelemetry({ level: "success", message: `Sonho salvo: ${detail.note.title}` });
+      setNodeStatus("memory", "success");
+    } catch (error) {
+      addTelemetry({ level: "error", message: error instanceof Error ? error.message : "Falha no Dreaming Engine." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleSuggestion(suggestion: ConversationSuggestion): Promise<void> {
     if (suggestion.kind === "navigate" && suggestion.nodeId) {
       setRoute("neural");
@@ -301,6 +375,7 @@ export function ContextAwareCommandConsole(): JSX.Element {
     <section className="operator-console context-console hud-corners">
       <div className="context-console__bar">
         <span>Contexto ativo: <strong>{activeContext?.title ?? "nenhum"}</strong></span>
+        <span>Voz: <strong>{voiceStatusLabel(voiceStatus.state, voiceStatus.isAvailable)}</strong></span>
         <div style={{ display: "flex", gap: "8px" }}>
           {activeContext ? (
             <button type="button" className="hud-button hud-button--micro" onClick={clearActiveContext}>
@@ -362,10 +437,23 @@ export function ContextAwareCommandConsole(): JSX.Element {
       <div className="console-modes" aria-label="Modo do console">
         <button type="button" className={mode === "conversation" ? "active" : ""} onClick={() => setMode("conversation")}>Conversar</button>
         <button type="button" className={mode === "diagnostic" ? "active" : ""} onClick={() => setMode("diagnostic")}>Diagnosticar</button>
+        <button type="button" onClick={() => void handleOperatorRequest(value.trim() || "resuma isso")} disabled={busy}>Resumir</button>
+        <button type="button" onClick={() => void handleOperatorRequest("explique essa ligação")} disabled={busy || !selectedConnectionId}>Explicar ligação</button>
         <button type="button" className={mode === "action" ? "active" : ""} onClick={() => setMode("action")}>Preparar ação</button>
-        <button type="button" className={mode === "memory" ? "active" : ""} onClick={() => setMode("memory")}>Memória</button>
-        <button type="button" className={mode === "explore" ? "active" : ""} onClick={() => setMode("explore")}>Exploração</button>
         <button type="button" onClick={() => void handleSaveDecision()}>Salvar decisão</button>
+        <button type="button" onClick={() => void handleDreamNow()} disabled={busy}>Sonhar agora</button>
+        <button
+          type="button"
+          className={voiceStatus.state === "listening" ? "active" : ""}
+          onClick={() => voiceClient.startListening()}
+          disabled={!voiceStatus.isAvailable || voiceStatus.state === "listening"}
+          title={voiceStatus.isAvailable ? "Iniciar reconhecimento de voz" : "Reconhecimento indisponível"}
+        >
+          Escutar
+        </button>
+        <button type="button" onClick={() => { voiceClient.stopListening(); voiceClient.stopSpeaking(); }}>
+          Parar
+        </button>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -413,4 +501,18 @@ function intentLabel(intent: string): string {
     unknown: "Ambígua",
   };
   return labels[intent] ?? intent;
+}
+
+function voiceStatusLabel(state: string, available: boolean): string {
+  if (!available) {
+    return "Reconhecimento indisponível";
+  }
+  const labels: Record<string, string> = {
+    idle: "Inativa",
+    listening: "Ouvindo",
+    processing: "Processando",
+    speaking: "Falando",
+    error: "Erro",
+  };
+  return labels[state] ?? "N/D";
 }

@@ -1,4 +1,4 @@
-use rusqlite::Connection;
+use rusqlite::{Connection, OptionalExtension};
 
 use crate::memory_core::error::MemoryResult;
 
@@ -11,7 +11,7 @@ pub fn apply_migrations(conn: &Connection) -> MemoryResult<bool> {
           id TEXT PRIMARY KEY,
           path TEXT UNIQUE NOT NULL,
           title TEXT NOT NULL,
-          kind TEXT NOT NULL CHECK (kind IN ('note','project','system','conversation','decision','action','rule','import')),
+          kind TEXT NOT NULL CHECK (kind IN ('note','project','system','conversation','decision','action','rule','dream','import')),
           summary TEXT,
           content_hash TEXT NOT NULL,
           pinned INTEGER NOT NULL DEFAULT 0,
@@ -122,15 +122,12 @@ pub fn apply_migrations(conn: &Connection) -> MemoryResult<bool> {
           created_at TEXT NOT NULL
         );
 
-        CREATE INDEX IF NOT EXISTS idx_memory_notes_kind ON memory_notes(kind);
-        CREATE INDEX IF NOT EXISTS idx_memory_notes_updated ON memory_notes(updated_at);
-        CREATE INDEX IF NOT EXISTS idx_memory_chunks_note ON memory_chunks(note_id);
-        CREATE INDEX IF NOT EXISTS idx_memory_links_from ON memory_links(from_note_id);
-        CREATE INDEX IF NOT EXISTS idx_memory_links_to ON memory_links(to_note_id);
-        CREATE INDEX IF NOT EXISTS idx_memory_tags_tag ON memory_tags(tag);
         "#,
     )
     .map_err(|error| error.to_string())?;
+
+    ensure_memory_notes_accepts_dream(conn)?;
+    create_indexes(conn)?;
 
     let fts_result = conn.execute_batch(
         r#"
@@ -150,4 +147,67 @@ pub fn apply_migrations(conn: &Connection) -> MemoryResult<bool> {
     );
 
     Ok(fts_result.is_ok())
+}
+
+fn ensure_memory_notes_accepts_dream(conn: &Connection) -> MemoryResult<()> {
+    let schema = conn
+        .query_row(
+            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'memory_notes'",
+            [],
+            |row| row.get::<_, String>(0),
+        )
+        .optional()
+        .map_err(|error| error.to_string())?;
+    if schema.as_deref().is_none_or(|sql| sql.contains("'dream'")) {
+        return Ok(());
+    }
+
+    conn.execute_batch(
+        r#"
+        PRAGMA foreign_keys = OFF;
+        PRAGMA legacy_alter_table = ON;
+
+        ALTER TABLE memory_notes RENAME TO memory_notes_old;
+
+        CREATE TABLE memory_notes (
+          id TEXT PRIMARY KEY,
+          path TEXT UNIQUE NOT NULL,
+          title TEXT NOT NULL,
+          kind TEXT NOT NULL CHECK (kind IN ('note','project','system','conversation','decision','action','rule','dream','import')),
+          summary TEXT,
+          content_hash TEXT NOT NULL,
+          pinned INTEGER NOT NULL DEFAULT 0,
+          archived INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          last_indexed_at TEXT
+        );
+
+        INSERT INTO memory_notes (
+          id, path, title, kind, summary, content_hash, pinned, archived, created_at, updated_at, last_indexed_at
+        )
+        SELECT id, path, title, kind, summary, content_hash, pinned, archived, created_at, updated_at, last_indexed_at
+        FROM memory_notes_old;
+
+        DROP TABLE memory_notes_old;
+
+        PRAGMA legacy_alter_table = OFF;
+        PRAGMA foreign_keys = ON;
+        "#,
+    )
+    .map_err(|error| error.to_string())
+}
+
+fn create_indexes(conn: &Connection) -> MemoryResult<()> {
+    conn.execute_batch(
+        r#"
+        CREATE INDEX IF NOT EXISTS idx_memory_notes_kind ON memory_notes(kind);
+        CREATE INDEX IF NOT EXISTS idx_memory_notes_updated ON memory_notes(updated_at);
+        CREATE INDEX IF NOT EXISTS idx_memory_chunks_note ON memory_chunks(note_id);
+        CREATE INDEX IF NOT EXISTS idx_memory_links_from ON memory_links(from_note_id);
+        CREATE INDEX IF NOT EXISTS idx_memory_links_to ON memory_links(to_note_id);
+        CREATE INDEX IF NOT EXISTS idx_memory_tags_tag ON memory_tags(tag);
+        "#,
+    )
+    .map_err(|error| error.to_string())
 }

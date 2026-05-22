@@ -147,6 +147,7 @@ fn priority(note: &MemoryNote) -> f64 {
         MemoryNoteKind::Rule => 7.5,
         MemoryNoteKind::Project => 5.0,
         MemoryNoteKind::System => 4.0,
+        MemoryNoteKind::Dream => 2.8,
         MemoryNoteKind::Action => 2.0,
         MemoryNoteKind::Conversation => 1.5,
         _ => 1.0,

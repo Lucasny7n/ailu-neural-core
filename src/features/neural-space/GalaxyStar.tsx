@@ -23,7 +23,7 @@ export function GalaxyStar({ object, selected, dimmed, onSelect }: GalaxyStarPro
   useFrame((state, delta) => {
     if (groupRef.current) {
       const pulse = Math.sin(state.clock.elapsedTime * 1.4 + object.position[0]) * 0.04;
-      groupRef.current.scale.setScalar((active ? 1.25 : 1) + pulse);
+      groupRef.current.scale.setScalar((object.displayScale ?? 1) * 1.35 * ((active ? 1.25 : 1) + pulse));
     }
     if (ringRef.current) {
       ringRef.current.rotation.z += delta * 0.2;
@@ -35,7 +35,7 @@ export function GalaxyStar({ object, selected, dimmed, onSelect }: GalaxyStarPro
     <group
       ref={groupRef}
       position={object.position}
-      scale={1.4}
+      scale={(object.displayScale ?? 1) * 1.35}
       onPointerOver={(event) => {
         event.stopPropagation();
         setHovered(true);
